@@ -31,20 +31,58 @@ G = np.matrix([[sX, s0, sL, sR],
                [s0, sR, sL, sX]])
 p = 0.05 # Probability of faulty signal
 
+"""
+Initialise the HMM.
+"""
 def init_hmm():
     # Init matrix of size N x T and fill first column
     c = np.zeros(shape = (N, T))
     c[0].fill(1 / N) # Uniform prior
     c = np.matrix(c)
     c = c.getT()
-    print(c)
+    # print(c)
 
     # Init initial prob dist matrix of size 0 x N
+    global pi
     pi = np.zeros(shape = (1, N))
     pi[0].fill(1 / N) # Uniform prior
     pi = np.matrix(pi)
-    print(pi)
+    # print(pi)
+
+"""
+Recursively calculates the c value.
+s is a position tuple (vertex, edge), t is the 1-indexed sequence index.
+"""
+def c(s, t):
+    ### Case 1
+    if t == 0: return 1 / N
+
+    # Values from position tuple
+    v = s[0]
+    e = s[1] # edge
+    # Adjacent vertices to v
+    u = 0
+    w = 0
+    end_ix = 0
+    for i in range(M):
+        vertex = G.item(v, i)
+        if not np.isnan(vertex) and vertex != e[1]:
+            u = vertex
+            end_ix = i
+            break
+    for i in range(end_ix, M):
+        vertex = G.item(v, i)
+        if not np.isnan(vertex) and vertex != e[1] and not vertex == u:
+            w = vertex
+    # Incident edges to v != e
+    f = (u, v)
+    g = (w, v)
+
+    ### Case 2
+    if G.item(e[0], e[1]) == s0 and O[t - 1] == 0:
+        return (c((u, f), t - 1) + c((w, g), t - 1)) * (1 - p)
 
 if __name__ == '__main__':
     random.seed()
     init_hmm()
+    print(c((0, (0, 1)), 2))
