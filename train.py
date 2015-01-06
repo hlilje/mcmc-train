@@ -52,6 +52,7 @@ def init_hmm():
 """
 Recursively calculates the c value.
 s is a position tuple (vertex, edge), t is the sequence index (1-indexed).
+TODO Must set sigma first, what are the observation symbols?
 """
 def c(s, t):
     ### Case 1
@@ -66,7 +67,7 @@ def c(s, t):
     u = 0
     w = 0
     end_ix = 0
-    # Search through matrix to find the adjacent vertices
+    # Search through matrix to find the adjacent vertices, assume deg(v) == 3
     for i in range(M):
         vertex = G.item(v, i)
         if not np.isnan(vertex) and vertex != e2:
@@ -116,6 +117,8 @@ def c(s, t):
     ### Case 9
     if G.item(e1, e2) == sR and G.item(v, v) == sL:
         return 0
+
+    print("No return value for (s, t):", s, t)
 
 if __name__ == '__main__':
     random.seed()
