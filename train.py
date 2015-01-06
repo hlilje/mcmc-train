@@ -4,7 +4,7 @@ import random
 import numpy as np
 #import scipy as sp
 
-### Symbols for switch positions and signals
+### Symbols for switch edges/positions and signals
 s0 = 0
 sL = 1
 sR = 2
@@ -51,36 +51,71 @@ def init_hmm():
 
 """
 Recursively calculates the c value.
-s is a position tuple (vertex, edge), t is the 1-indexed sequence index.
+s is a position tuple (vertex, edge), t is the sequence index (1-indexed).
 """
 def c(s, t):
     ### Case 1
     if t == 0: return 1 / N
 
     # Values from position tuple
-    v = s[0]
-    e = s[1] # edge
+    v = s[0] # vertex
+    e = s[1] # edge tuple
+    e1 = e[0]
+    e2 = e[1]
     # Adjacent vertices to v
     u = 0
     w = 0
     end_ix = 0
+    # Search through matrix to find the adjacent vertices
     for i in range(M):
         vertex = G.item(v, i)
-        if not np.isnan(vertex) and vertex != e[1]:
+        if not np.isnan(vertex) and vertex != e2:
             u = vertex
             end_ix = i
             break
     for i in range(end_ix, M):
         vertex = G.item(v, i)
-        if not np.isnan(vertex) and vertex != e[1] and not vertex == u:
+        if not np.isnan(vertex) and vertex != e2 and not vertex == u:
             w = vertex
     # Incident edges to v != e
     f = (u, v)
     g = (w, v)
 
     ### Case 2
-    if G.item(e[0], e[1]) == s0 and O[t - 1] == 0:
+    if G.item(e1, e2) == s0 and O[t - 1] == 0:
         return (c((u, f), t - 1) + c((w, g), t - 1)) * (1 - p)
+
+    ### Case 3
+    if G.item(e1, e2) == s0 and not O[t - 1] == 0:
+        return (c((u, f), t - 1) + c((w, g), t - 1)) * p
+
+    ### Case 4
+    if G.item(e1, e2) == sL and G.item(v, v) == sL and O[t - 1] == sL \
+            and G.item(v, u) == s0:
+        return c((u, f), t - 1) * (1 - p)
+
+    ### Case 5
+    if G.item(e1, e2) == sL and G.item(v, v) == sL and O[t - 1] != sL \
+            and G.item(v, u) == s0:
+        return c((u, f), t - 1) * p
+
+    ### Case 6
+    if G.item(e1, e2) == sR and G.item(v, v) == sR and O[t - 1] == sR \
+            and G.item(v, u) == s0:
+        return c((u, f), t - 1) * (1 - p)
+
+    ### Case 7
+    if G.item(e1, e2) == sR and G.item(v, v) == sR and O[t - 1] != sR \
+            and G.item(v, u) == s0:
+        return c((u, f), t - 1) * p
+
+    ### Case 8
+    if G.item(e1, e2) == sL and G.item(v, v) == sR:
+        return 0
+
+    ### Case 9
+    if G.item(e1, e2) == sR and G.item(v, v) == sL:
+        return 0
 
 if __name__ == '__main__':
     random.seed()
