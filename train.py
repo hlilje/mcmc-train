@@ -5,16 +5,16 @@ import numpy as np
 import scipy as sp
 
 # HMM parameters
-S = 10 # Number of positions
-T = 10 # Number of transitions
-N = 10 # Number of states?
-mat_transition # Transition matrix
-mat_emission # Emission matrix
-mat_probdist # Initial state probability distribution
+N  = 10 # Number of states (positions)
+M  = 10 # Number of possible observations
+T  = 10 # Number of observations
+A  = np.matrix(np.ones(shape = (N, N))) # Transition matrix, always 1 since switches are fixed
+B  = np.matrix(np.zeros(shape = (N, M))) # Emission matrix
+pi = np.matrix(np.zeros(shape = (0, N))) # Initial state probability distribution
 
 def hmm():
     # Init matrix of size S x T and fill first column
-    c = np.zeros(shape = (S, T))
+    c = np.zeros(shape = (N, T))
     c[0].fill(1 / N)
     c = np.matrix(c)
     c = c.getT()
