@@ -2,22 +2,26 @@
 
 import random
 import numpy as np
-import scipy as sp
+#import scipy as sp
 
-# Symbols for switch positions
+# Symbols for switch positions and signals
 s0 = 0
 sL = 1
 sR = 2
 sX = np.nan # No switch/edge
+s0L = 0
+s0R = 1
+sL0 = 2
+sR0 = 3
 
 # HMM parameters
 N  = 4                                   # Number of states (positions)
-M  = 3                                   # Number of possible observations
-T  = 5                                   # Number of observations
+M  = 4                                   # Number of possible observations
+T  = 8                                   # Number of observations
 A  = np.matrix(np.ones(shape = (N, N)))  # Transition matrix (positions, always 1 due to fixed switches)
 B  = np.matrix(np.zeros(shape = (N, M))) # Emission matrix
 pi = np.matrix(np.zeros(shape = (0, N))) # Initial state probability distribution
-O  = [0, 1, 2, 2, 0]                     # Observation sequence (signals)
+O  = [0, 1, 3, 2, 1, 0, 2, 3]            # Observation sequence (signals)
 
 # Model parameters
 G = np.matrix([[sX, s0, sL, sR],  # Graph of track and switches
