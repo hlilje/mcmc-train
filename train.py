@@ -31,12 +31,13 @@ O  = [s0, sL, s0]                        # Observation sequence (signals)
 #                 [sR, sX, sL, s0],
 #                 [s0, sR, sX, sL],
 #                 [s0, sR, sL, sX]])
-G  = np.matrix([[sL, s0, sL, sR],
-                [sR, sR, sL, s0],
-                [s0, sR, sR, sL],
-                [s0, sR, sL, s0]])
-p  = 0.05 # Probability of faulty signal
-NV = 4    # |V(G)|
+G     = np.matrix([[sL, s0, sL, sR],
+                   [sR, sR, sL, s0],
+                   [s0, sR, sR, sL],
+                   [s0, sR, sL, s0]])
+p     = 0.05 # Probability of faulty signal
+p_inv = 1 - p
+NV    = 4    # |V(G)|
 
 """
 Initialise the HMM.
@@ -106,46 +107,52 @@ def c(s, t):
     g = (v, w)
 
     # Assumes only edge e1 (v) -> e2 should be considered, since e is exit edge
+    e_label = G.item(e1, e2)
+    f_label = G.item(v, u) # f at v
+    v_switch = G.item(v, v)
+    obs = O[t - 1]
+    t_prev = t - 1
+
     ### Case 2
-    if G.item(e1, e2) == s0 and O[t - 1] == 0:
-        return (c((u, f), t - 1) + c((w, g), t - 1)) * (1 - p)
+    if e_label == s0 and obs == 0:
+        return (c((u, f), t_prev) + c((w, g), t_prev)) * p_inv
 
     ### Case 3
-    if G.item(e1, e2) == s0 and O[t - 1] != 0:
-        return (c((u, f), t - 1) + c((w, g), t - 1)) * p
+    if e_label == s0 and obs != 0:
+        return (c((u, f), t_prev) + c((w, g), t_prev)) * p
 
     ### Case 4
-    if G.item(e1, e2) == sL and G.item(v, v) == sL and O[t - 1] == sL \
-            and G.item(v, u) == s0:
-        return c((u, f), t - 1) * (1 - p)
+    if e_label == sL and v_switch == sL and obs == sL \
+            and f_label == s0:
+        return c((u, f), t_prev) * p_inv
 
     ### Case 5
-    if G.item(e1, e2) == sL and G.item(v, v) == sL and O[t - 1] != sL \
-            and G.item(v, u) == s0:
-        return c((u, f), t - 1) * p
+    if e_label == sL and v_switch == sL and obs != sL \
+            and f_label == s0:
+        return c((u, f), t_prev) * p
 
     ### Case 6
-    if G.item(e1, e2) == sR and G.item(v, v) == sR and O[t - 1] == sR \
-            and G.item(v, u) == s0:
-        return c((u, f), t - 1) * (1 - p)
+    if e_label == sR and v_switch == sR and obs == sR \
+            and f_label == s0:
+        return c((u, f), t_prev) * p_inv
 
     ### Case 7
-    if G.item(e1, e2) == sR and G.item(v, v) == sR and O[t - 1] != sR \
-            and G.item(v, u) == s0:
-        return c((u, f), t - 1) * p
+    if e_label == sR and v_switch == sR and obs != sR \
+            and f_label == s0:
+        return c((u, f), t_prev) * p
 
     ### Case 8
-    if G.item(e1, e2) == sL and G.item(v, v) == sR:
+    if e_label == sL and v_switch == sR:
         return 0
 
     ### Case 9
-    if G.item(e1, e2) == sR and G.item(v, v) == sL:
+    if e_label == sR and v_switch == sL:
         return 0
 
     print("No return value for (s, t):", s, t)
     print("g:", g, "f:", f)
-    print("f label at v:", G.item(v, u))
-    print("v value:", G.item(v, v))
+    print("f label at v:", f_label)
+    print("v value:", v_switch)
 
 """
 Calculates p(s, O | G, sigma)
