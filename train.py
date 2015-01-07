@@ -160,8 +160,9 @@ Calculates p(s, O | G, sigma)
 def calc_stop_obs_prob():
     prob_sum = 0.0
 
+    # Calculate total probability for all states (positions)
     for v in range(N):
-        # Search through matrix to find the adjacent vertices, assume deg(v) == 3
+        # Find the edges, assume deg(v) == 3
         e = (v, 0)
         for i in range(M):
             w = G.item(v, i)
@@ -190,8 +191,8 @@ def calc_obs_prob():
 if __name__ == '__main__':
     random.seed()
     init_hmm()
-    # print(calc_stop_obs_prob())
+    print(calc_stop_obs_prob())
 
     # Should be called on the stop position
     # print(c((0, (0, 1)), 8))
-    print(c((0, (0, 1)), T)) # Works
+    # print(c((0, (0, 1)), T)) # Works
