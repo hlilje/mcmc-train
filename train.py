@@ -46,21 +46,21 @@ def init_hmm():
     # TODO Not row stochastic
     global A
     A = np.matrix(np.ones(shape = (N, N))) # Fixes switches
-    print(A)
+    # print(A)
 
     # Init observation matrix of size N x M
     # TODO Not row stochastic
     global B
     B = np.matrix(np.zeros(shape = (N, M)))
     B.fill(1 / 2) # Prior for all switches
-    print(B)
+    # print(B)
 
     # Init initial prob dist matrix of size 0 x N
     global pi
     pi = np.zeros(shape = (1, N))
     pi.fill(1 / N) # Uniform prior
     pi = np.matrix(pi)
-    print(pi)
+    # print(pi)
 
 """
 Recursively calculates the c value.
@@ -83,24 +83,26 @@ def c(s, t):
     # Search through matrix to find the adjacent vertices, assume deg(v) == 3
     for i in range(M):
         vertex = G.item(v, i)
-        if not np.isnan(vertex) and vertex != e2:
+        if not np.isnan(vertex) and vertex != e1 and vertex != e2:
             u = vertex
             end_ix = i
             break
     for i in range(end_ix, M):
         vertex = G.item(v, i)
-        if not np.isnan(vertex) and vertex != e2 and not vertex == u:
+        if not np.isnan(vertex) and vertex != e1 and vertex != e2 and not vertex == u:
             w = vertex
+            break
     # Incident edges to v != e
     f = (u, v)
     g = (w, v)
 
+    # Assumes only edge e1 -> e2 should be considered
     ### Case 2
     if G.item(e1, e2) == s0 and O[t - 1] == 0:
         return (c((u, f), t - 1) + c((w, g), t - 1)) * (1 - p)
 
     ### Case 3
-    if G.item(e1, e2) == s0 and not O[t - 1] == 0:
+    if G.item(e1, e2) == s0 and O[t - 1] != 0:
         return (c((u, f), t - 1) + c((w, g), t - 1)) * p
 
     ### Case 4
@@ -136,4 +138,6 @@ def c(s, t):
 if __name__ == '__main__':
     random.seed()
     init_hmm()
-    print(c((0, (0, 1)), 2))
+
+    # Should be called on the stop position
+    print(c((0, (0, 1)), 8))
