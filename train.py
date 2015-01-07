@@ -94,13 +94,12 @@ def c(s, t):
             u = vertex
             end_ix = i
             break
-    for i in range(end_ix, M):
+    for i in range(end_ix + 1, M):
         vertex = G.item(v, i)
-        if not np.isnan(vertex) and vertex != e1 and vertex != e2 and not vertex == u:
+        if not np.isnan(vertex) and vertex != e2 and vertex != u:
             w = vertex
             break
-    # Incident edges to v != e
-    # Reversd order from description
+    # Incident edges to v != e (reversed order from description)
     # f = (u, v)
     f = (v, u)
     # g = (w, v)
@@ -148,10 +147,44 @@ def c(s, t):
     print("f label at v:", G.item(v, u))
     print("v value:", G.item(v, v))
 
+"""
+Calculates p(s, O | G, sigma)
+"""
+def calc_stop_obs_prob():
+    prob_sum = 0.0
+
+    for v in range(N):
+        # Search through matrix to find the adjacent vertices, assume deg(v) == 3
+        e = (v, 0)
+        for i in range(M):
+            w = G.item(v, i)
+            if not np.isnan(w) and w != v:
+                e = (v, w)
+                end_ix = i
+                break
+        prob_sum = prob_sum + c((v, e), T)
+
+        for i in range(end_ix + 1, M):
+            w = G.item(v, i)
+            if not np.isnan(w) and w != v:
+                e = (v, w)
+                break
+        prob_sum = prob_sum + c((v, e), T)
+
+    return prob_sum
+
+"""
+Calculates p(O | G, sigma)
+"""
+def calc_obs_prob():
+    # TODO Sum out the stop position
+    return 0.0
+
 if __name__ == '__main__':
     random.seed()
     init_hmm()
+    # print(calc_stop_obs_prob())
 
     # Should be called on the stop position
     # print(c((0, (0, 1)), 8))
-    print(c((0, (0, 1)), 3))
+    print(c((0, (0, 1)), T)) # Works
