@@ -101,9 +101,7 @@ def c(s, t):
             w = vertex
             break
     # Incident edges to v != e (reversed order from description)
-    # f = (u, v)
     f = (v, u)
-    # g = (w, v)
     g = (v, w)
 
     # Assumes only edge e1 (v) -> e2 should be considered, since e is exit edge
@@ -112,34 +110,36 @@ def c(s, t):
     v_switch = G.item(v, v)
     obs = O[t - 1]
     t_prev = t - 1
+    s1 = (u, f)
+    s2 = (w, g)
 
     ### Case 2
     if e_label == s0 and obs == 0:
-        return (c((u, f), t_prev) + c((w, g), t_prev)) * p_inv
+        return (c(s1, t_prev) + c(s2, t_prev)) * p_inv
 
     ### Case 3
     if e_label == s0 and obs != 0:
-        return (c((u, f), t_prev) + c((w, g), t_prev)) * p
+        return (c(s1, t_prev) + c(s2, t_prev)) * p
 
     ### Case 4
     if e_label == sL and v_switch == sL and obs == sL \
             and f_label == s0:
-        return c((u, f), t_prev) * p_inv
+        return c(s1, t_prev) * p_inv
 
     ### Case 5
     if e_label == sL and v_switch == sL and obs != sL \
             and f_label == s0:
-        return c((u, f), t_prev) * p
+        return c(s1, t_prev) * p
 
     ### Case 6
     if e_label == sR and v_switch == sR and obs == sR \
             and f_label == s0:
-        return c((u, f), t_prev) * p_inv
+        return c(s1, t_prev) * p_inv
 
     ### Case 7
     if e_label == sR and v_switch == sR and obs != sR \
             and f_label == s0:
-        return c((u, f), t_prev) * p
+        return c(s1, t_prev) * p
 
     ### Case 8
     if e_label == sL and v_switch == sR:
@@ -194,5 +194,4 @@ if __name__ == '__main__':
     print(calc_stop_obs_prob())
 
     # Should be called on the stop position
-    # print(c((0, (0, 1)), 8))
     # print(c((0, (0, 1)), T)) # Works
