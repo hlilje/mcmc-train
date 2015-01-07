@@ -90,17 +90,19 @@ def c(s, t):
     end_ix = 0
     # Search through matrix to find the adjacent vertices, assume deg(v) == 3
     for i in range(M):
-        vertex = G.item(v, i)
-        if not np.isnan(vertex) and vertex != e1 and vertex != e2:
-            u = vertex
+        if not np.isnan(G.item(v, i)) and i != e1 and i != e2:
+            u = i
             end_ix = i
             break
     for i in range(end_ix + 1, M):
-        vertex = G.item(v, i)
-        if not np.isnan(vertex) and vertex != e2 and vertex != u:
-            w = vertex
+        print(i)
+        if not np.isnan(G.item(v, i)) and i != e2 and i != u:
+            w = i
             break
     # Incident edges to v != e (reversed order from description)
+    # TODO Fix  order and get the right vertices
+    # f = (u, v)
+    # g = (w, v)
     f = (v, u)
     g = (v, w)
 
@@ -114,11 +116,11 @@ def c(s, t):
     s2 = (w, g)
 
     ### Case 2
-    if e_label == s0 and obs == 0:
+    if e_label == s0 and obs == s0:
         return (c(s1, t_prev) + c(s2, t_prev)) * p_inv
 
     ### Case 3
-    if e_label == s0 and obs != 0:
+    if e_label == s0 and obs != s0:
         return (c(s1, t_prev) + c(s2, t_prev)) * p
 
     ### Case 4
@@ -158,26 +160,29 @@ def c(s, t):
 Calculates p(s, O | G, sigma)
 """
 def calc_stop_obs_prob():
-    prob_sum = 0.0
+    prob_sum = 0
 
     # Calculate total probability for all states (positions)
     for v in range(N):
         # Find the edges, assume deg(v) == 3
         e = (v, 0)
-        for i in range(M):
-            w = G.item(v, i)
-            if not np.isnan(w) and w != v:
+        for w in range(M):
+            if not np.isnan(G.item(v, w)) and w != v:
+                print("pick", w, "for", v)
                 e = (v, w)
-                end_ix = i
+                end_ix = w
                 break
         prob_sum = prob_sum + c((v, e), T)
+        print(v, e)
 
-        for i in range(end_ix + 1, M):
-            w = G.item(v, i)
-            if not np.isnan(w) and w != v:
+        for w in range(end_ix + 1, M):
+            if not np.isnan(G.item(v, w)) and w != v:
+                print("pick", w, "for", v)
                 e = (v, w)
                 break
         prob_sum = prob_sum + c((v, e), T)
+        print(v, e)
+        print((v, e), T, prob_sum)
 
     return prob_sum
 
@@ -186,7 +191,7 @@ Calculates p(O | G, sigma)
 """
 def calc_obs_prob():
     # TODO Sum out the stop position
-    return 0.0
+    return 0
 
 if __name__ == '__main__':
     random.seed()
@@ -194,4 +199,4 @@ if __name__ == '__main__':
     print(calc_stop_obs_prob())
 
     # Should be called on the stop position
-    # print(c((0, (0, 1)), T)) # Works
+    # print(c((0, (0, 1)), T)) # Worked
