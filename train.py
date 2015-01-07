@@ -15,21 +15,28 @@ sL0 = 2
 sR0 = 3
 
 ### HMM parameters
-N  = 12                                  # Number of states (positions, (v, e) => v x 3)
+N  = 12                                  # Number of states (positions, (v, e) => |V(G)| x 3)
 M  = 4                                   # Number of possible observations
-T  = 8                                   # Number of observations
+# T  = 8                                   # Number of observations
+T  = 3                                   # Number of observations
 A  = np.matrix(np.ones(shape = (N, N)))  # Transition matrix (positions, always 1 due to fixed switches)
 B  = np.matrix(np.zeros(shape = (N, M))) # Observation matrix
 pi = np.matrix(np.zeros(shape = (1, N))) # Initial state probability distribution
-O  = [0, 1, 3, 2, 1, 0, 2, 3]            # Observation sequence (signals)
+# O  = [0, 1, 3, 2, 1, 0, 2, 3]            # Observation sequence (signals)
+O  = [s0, sL, s0]                        # Observation sequence (signals)
 
 ### Model parameters
 # Graph over switches, switch x to y may be different from y to x
-G = np.matrix([[sX, s0, sL, sR],
-               [sR, sX, sL, s0],
-               [s0, sR, sX, sL],
-               [s0, sR, sL, sX]])
-p = 0.05 # Probability of faulty signal
+# G  = np.matrix([[sX, s0, sL, sR],
+#                 [sR, sX, sL, s0],
+#                 [s0, sR, sX, sL],
+#                 [s0, sR, sL, sX]])
+G  = np.matrix([[sL, s0, sL, sR],
+                [sR, sR, sL, s0],
+                [s0, sR, sR, sL],
+                [s0, sR, sL, s0]])
+p  = 0.05 # Probability of faulty signal
+NV = 4    # |V(G)|
 
 """
 Initialise the HMM.
@@ -69,7 +76,7 @@ TODO Must set sigma first, what are the observation symbols?
 """
 def c(s, t):
     ### Case 1
-    if t == 0: return 1 / N
+    if t == 0: return 1 / NV
 
     # Values from position tuple
     v = s[0] # vertex
@@ -93,10 +100,13 @@ def c(s, t):
             w = vertex
             break
     # Incident edges to v != e
-    f = (u, v)
-    g = (w, v)
+    # Reversd order from description
+    # f = (u, v)
+    f = (v, u)
+    # g = (w, v)
+    g = (v, w)
 
-    # Assumes only edge e1 -> e2 should be considered
+    # Assumes only edge e1 (v) -> e2 should be considered, since e is exit edge
     ### Case 2
     if G.item(e1, e2) == s0 and O[t - 1] == 0:
         return (c((u, f), t - 1) + c((w, g), t - 1)) * (1 - p)
@@ -134,10 +144,14 @@ def c(s, t):
         return 0
 
     print("No return value for (s, t):", s, t)
+    print("g:", g, "f:", f)
+    print("f label at v:", G.item(v, u))
+    print("v value:", G.item(v, v))
 
 if __name__ == '__main__':
     random.seed()
     init_hmm()
 
     # Should be called on the stop position
-    print(c((0, (0, 1)), 8))
+    # print(c((0, (0, 1)), 8))
+    print(c((0, (0, 1)), 3))
