@@ -195,40 +195,44 @@ def calc_obs_prob():
 
 """
 Proposal distribution.
+A Gaussion distribution centred on x.
+Should match target distribution.
 """
-def q(x, y):
-    g1 = mlab.bivariate_normal(x, y, 1.0, 1.0, -1, -1, -0.8)
-    g2 = mlab.bivariate_normal(x, y, 1.5, 0.8, 1, 2, 0.6)
-    return 0.6*g1+28.4*g2/(0.6+28.4)
+def q(x):
+    # Centre, standard deviation (width), shape
+    return np.random.normal(x)
 
 """
 Metropolis-Hastings algorithm.
+Returns an array with the generated values.
 """
 def metropolis_hastings():
-    iters = 100000        # MH iterations
-    s     = 10            # Thinning steps
-    r     = np.zeros(2)   # Normal samples
-    p     = q(r[0], r[1]) # Proposal samples
-    print(p)
+    iters = 100000 # MH iterations
+    s     = 10     # Thinning steps
+    x     = 0      # Initial state
+    p     = q(x)   # Proposal sample
+    print("Initial proposal sample:", p)
     samples = []
 
-    for i in xrange(iters):
-        rn = r + np.random.normal(size = 2) # Sample 2 values from normal distribution
-        pn = q(rn[0], rn[1]) # Sample from proposal distribution
+    for i in range(iters):
+        xn = x + np.random.normal() # Normal proposal distribution, recent value
+        pn = q(xn) # Sample from proposal distribution
 
-        if pn >= p: # Accept new samples
+        # Accept proposal immediately if it is better than previous
+        if pn >= p:
             p = pn
-            r = rn
+            x = xn
         else:
+            # Posterior is the ration between proposed and previous sample
+            accept = min(1.0, pn / p) # Acceptance probability
             u = np.random.rand() # Generate uniform sample
             if u < pn / p: # Accept new samples
                 p = pn
-                r = rn
+                x = xn
         if i % s == 0: # Thin
-            samples.append(r)
+            samples.append(x)
 
-    samples = np.array(samples)
-    print(samples)
+    return np.array(samples)
 
 if __name__ == '__main__':
     random.seed()
@@ -238,4 +242,4 @@ if __name__ == '__main__':
     # Should be called on the stop position
     # print(c((0, (0, 1)), T)) # Worked
 
-    metropolis_hastings()
+    print("Generated samples:", metropolis_hastings())
