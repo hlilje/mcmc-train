@@ -162,9 +162,9 @@ Calculates p(s, O | G, sigma)
 def calc_stop_obs_prob():
     prob_sum = 0
 
-    # Calculate total probability for all states (positions)
-    for v in range(N):
-        # Find the edges, assume deg(v) == 3
+    # Calculate total probability for all states (positions) by
+    # finding all three edges from all vertices (assume deg(v) = 3)
+    for v in range(M):
         e = (v, 0)
         for w in range(M):
             if not np.isnan(G.item(v, w)) and w != v:
@@ -179,9 +179,17 @@ def calc_stop_obs_prob():
             if not np.isnan(G.item(v, w)) and w != v:
                 print("pick", w, "for", v)
                 e = (v, w)
+                end_ix = w
                 break
         prob_sum = prob_sum + c((v, e), T)
         print(v, e)
+
+        for w in range(end_ix + 1, M):
+            if not np.isnan(G.item(v, w)) and w != v:
+                print("pick", w, "for", v)
+                e = (v, w)
+                break
+        prob_sum = prob_sum + c((v, e), T)
         print((v, e), T, prob_sum)
 
     return prob_sum
@@ -194,8 +202,7 @@ def calc_obs_prob():
     return 0
 
 """
-Proposal distribution.
-A Gaussion distribution centred on x.
+Proposal distribution, a Gaussion distribution centred on x.
 Should match target distribution.
 """
 def q(x):
@@ -240,6 +247,6 @@ if __name__ == '__main__':
     # print(calc_stop_obs_prob())
 
     # Should be called on the stop position
-    # print(c((0, (0, 1)), T)) # Worked
+    print(c((0, (0, 1)), T)) # Worked
 
-    print("Generated samples:", metropolis_hastings())
+    # print("Generated samples:", metropolis_hastings())
