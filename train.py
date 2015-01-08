@@ -193,10 +193,49 @@ def calc_obs_prob():
     # TODO Sum out the stop position
     return 0
 
+"""
+Proposal distribution.
+"""
+def q(x, y):
+    g1 = mlab.bivariate_normal(x, y, 1.0, 1.0, -1, -1, -0.8)
+    g2 = mlab.bivariate_normal(x, y, 1.5, 0.8, 1, 2, 0.6)
+    return 0.6*g1+28.4*g2/(0.6+28.4)
+
+"""
+Metropolis-Hastings algorithm.
+"""
+def metropolis_hastings():
+    iters = 100000        # MH iterations
+    s     = 10            # Thinning steps
+    r     = np.zeros(2)   # Normal samples
+    p     = q(r[0], r[1]) # Proposal samples
+    print(p)
+    samples = []
+
+    for i in xrange(iters):
+        rn = r + np.random.normal(size = 2) # Sample 2 values from normal distribution
+        pn = q(rn[0], rn[1]) # Sample from proposal distribution
+
+        if pn >= p: # Accept new samples
+            p = pn
+            r = rn
+        else:
+            u = np.random.rand() # Generate uniform sample
+            if u < pn / p: # Accept new samples
+                p = pn
+                r = rn
+        if i % s == 0: # Thin
+            samples.append(r)
+
+    samples = np.array(samples)
+    print(samples)
+
 if __name__ == '__main__':
     random.seed()
     init_hmm()
-    print(calc_stop_obs_prob())
+    # print(calc_stop_obs_prob())
 
     # Should be called on the stop position
     # print(c((0, (0, 1)), T)) # Worked
+
+    metropolis_hastings()
