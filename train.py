@@ -193,6 +193,80 @@ def calc_obs_prob():
     # TODO Sum out the stop position
     return 0
 
+# Define logarithmic likelihood function.
+# params ... array of fit params, here just alpha
+# D      ... sum over log(M_n)
+# N      ... number of data points.
+# M_min  ... lower limit of mass interval
+# M_max  ... upper limit of mass interval
+def evaluate_log_likelihood(params, D, N, M_min, M_max):
+    alpha = params[0] # Extract alpha
+    # Compute normalisation constant.
+    c = (1.0 - alpha) / (math.pow(M_max, 1.0 - alpha)
+                       - math.pow(M_min, 1.0 - alpha))
+    # Return log likelihood
+    return N * math.log(c) - alpha * D
+
+# Generate toy data.
+# N      = 1000000  # Draw 1 Million stellar masses.
+# alpha  = 2.35
+# M_min  = 1.0
+# M_max  = 100.0
+# Masses = sampleFromSalpeter(N, alpha, M_min, M_max)
+# LogM   = numpy.log(numpy.array(Masses))
+# D      = numpy.mean(LogM)*N
+
+"""
+Metropolis-Hastings algorithm.
+"""
+def metrolopis_hastings():
+    # Initial guess for alpha as array
+    guess = [3.0]
+    # Prepare storing MCMC chain as array of arrays
+    chain = [guess]
+    # Define stepsize of MCMC
+    stepsizes = [0.005] # Array of stepsizes
+    accepted = 0.0
+    iters = 10000
+
+    # Metropolis-Hastings
+    for n in range(iters):
+        old_alpha  = chain[len(chain) - 1] # Old parameter value as array
+        old_loglik = evaluate_log_likelihood(old_alpha, D, N, M_min, M_max)
+        # Suggest new candidate from Gaussian proposal distribution
+        new_alpha = numpy.zeros([len(old_alpha)])
+
+        for i in range(len(old_alpha)):
+            # Use stepsize provided for every dimension
+            new_alpha[i] = random.gauss(old_alpha[i], stepsizes[i])
+
+        new_loglik = evaluate_log_likelihood(new_alpha, D, N, M_min, M_max)
+
+        # Accept new candidate in Monte-Carlo fashing
+        if (new_loglik > old_loglik):
+            chain.append(new_alpha)
+            accepted = accepted + 1.0 # Monitor acceptance
+        else:
+            u = random.uniform(0.0, 1.0)
+
+            if (u < math.exp(new_loglik - old_loglik)):
+                chain.append(new_alpha)
+                accepted = accepted + 1.0 # Monitor acceptance
+            else:
+                chain.append(old_alpha)
+
+    print("Acceptance rate = " + str(accepted / iters))
+
+    # Discard first half of MCMC chain and thin out the rest
+    clean = []
+    for n in range(5000,10000):
+        if (n % 10 == 0):
+            clean.append(chain[n][0])
+
+    # Print Monte-Carlo estimate of alpha
+    print("Mean:  " + str(numpy.mean(clean)))
+    print("Sigma: " + str(numpy.std(clean)))
+
 if __name__ == '__main__':
     random.seed()
     init_hmm()
