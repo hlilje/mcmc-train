@@ -76,8 +76,11 @@ s is a position tuple (vertex, edge), t is the sequence index (1-indexed).
 TODO Must set sigma first, what are the observation symbols?
 """
 def c(s, t):
+    print("Enter with (s, t):", s, t)
     ### Case 1
-    if t == 0: return 1 / NV
+    if t == 0:
+        print("Case 1")
+        return 1 / NV
 
     # Values from position tuple
     v = s[0] # vertex
@@ -95,16 +98,16 @@ def c(s, t):
             end_ix = i
             break
     for i in range(end_ix + 1, M):
-        print(i)
-        if not np.isnan(G.item(v, i)) and i != e2 and i != u:
+        if not np.isnan(G.item(v, i)) and i != e1 and i != e2 and i != u:
             w = i
             break
     # Incident edges to v != e (reversed order from description)
-    # TODO Fix  order and get the right vertices
-    # f = (u, v)
-    # g = (w, v)
-    f = (v, u)
-    g = (v, w)
+    f = (u, v)
+    g = (w, v)
+    # f = (v, u)
+    # g = (v, w)
+
+    print("f:", f, "g:", g)
 
     # Assumes only edge e1 (v) -> e2 should be considered, since e is exit edge
     e_label = G.item(e1, e2)
@@ -115,40 +118,50 @@ def c(s, t):
     s1 = (u, f)
     s2 = (w, g)
 
+    print("e label:", e_label, "f label:", f_label, "v switch:", v_switch)
+
     ### Case 2
     if e_label == s0 and obs == s0:
+        print("Case 2")
         return (c(s1, t_prev) + c(s2, t_prev)) * p_inv
 
     ### Case 3
     if e_label == s0 and obs != s0:
+        print("Case 3")
         return (c(s1, t_prev) + c(s2, t_prev)) * p
 
     ### Case 4
     if e_label == sL and v_switch == sL and obs == sL \
             and f_label == s0:
+        print("Case 4")
         return c(s1, t_prev) * p_inv
 
     ### Case 5
     if e_label == sL and v_switch == sL and obs != sL \
             and f_label == s0:
+        print("Case 5")
         return c(s1, t_prev) * p
 
     ### Case 6
     if e_label == sR and v_switch == sR and obs == sR \
             and f_label == s0:
+        print("Case 6")
         return c(s1, t_prev) * p_inv
 
     ### Case 7
     if e_label == sR and v_switch == sR and obs != sR \
             and f_label == s0:
+        print("Case 7")
         return c(s1, t_prev) * p
 
     ### Case 8
     if e_label == sL and v_switch == sR:
+        print("Case 8")
         return 0
 
     ### Case 9
     if e_label == sR and v_switch == sL:
+        print("Case 9")
         return 0
 
     print("No return value for (s, t):", s, t)
