@@ -10,30 +10,27 @@ s0 = 0
 sL = 1
 sR = 2
 sX = np.nan # No switch/edge
+# TODO Currently not used
 s0L = 0
 s0R = 1
 sL0 = 2
 sR0 = 3
 
 ### HMM parameters
-N  = 12                                  # Number of states (positions, (v, e) => |V(G)| x 3)
-M  = 3                                   # Number of possible observations
-T  = 3                                   # Number of observations
-A  = np.matrix(np.ones(shape = (N, N)))  # Transition matrix (positions, always 1 due to fixed switches)
-B  = np.matrix(np.zeros(shape = (N, M))) # Observation matrix
-pi = np.matrix(np.zeros(shape = (1, N))) # Initial state probability distribution
-O  = [s0, sL, s0]                        # Observation sequence (signals)
+N  = 0     # Number of states (positions, (v, e) => |V(G)| x 3)
+M  = 0     # Number of possible observations
+T  = 0     # Number of observations
+A  = [[0]] # Transition matrix (positions, always 1 due to fixed switches)
+B  = [[0]] # Observation matrix
+pi = [[0]] # Initial state probability distribution
+O  = [0]   # Observation sequence (signals)
 
 ### Model parameters
 # Graph over switches, switch x to y may be different from y to x
-# (Switches cannot be set to 0)
-G     = np.matrix([[sL, s0, sL, sR],
-                   [sR, sR, sL, s0],
-                   [s0, sR, sR, sL],
-                   [s0, sR, sL, sL]])
+G     = [[0]]   # (Switches cannot be set to 0)
 p     = 0.05    # Probability of faulty signal
 p_inv = 1.0 - p # Probability of correct signal
-NV    = 4       # |V(G)|
+NV    = 0       # |V(G)|
 
 """
 Parses the given text file to generate data for G and observations.
@@ -41,10 +38,12 @@ Parses the given text file to generate data for G and observations.
 def read_data():
     data = fileinput.input()
 
-    # Read number of possible observations and |V(G)|
-    global M, NV, G
+    # Read number of possible observations, |V(G)| and calculate
+    # number of states
+    global M, NV, G, O, T, N
     M = int(next(data))
     NV = int(next(data))
+    N = NV * 3
     G = np.matrix(np.zeros(shape = (NV, NV)))
 
     # Read G values
@@ -54,18 +53,13 @@ def read_data():
            G[i, j] = int(values[j])
 
     # Read observation sequence length
-    global O, T
-    O = np.array(np.zeros(T))
     T = int(next(data))
+    O = np.array(np.zeros(T))
 
     # Read observation sequence
     values = next(data).split()
     for i in range(T):
         O[i] = int(values[i])
-
-    # Calculate number of states
-    global N
-    N = NV * 3
 
 """
 Initialise the HMM.
@@ -284,6 +278,7 @@ if __name__ == '__main__':
     random.seed()
     read_data()
     init_hmm()
+
     # print(calc_stop_obs_prob())
 
     # Should be called on the stop position
