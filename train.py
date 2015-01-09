@@ -34,7 +34,7 @@ O  = [s0, sL, s0]                        # Observation sequence (signals)
 G     = np.matrix([[sL, s0, sL, sR],
                    [sR, sR, sL, s0],
                    [s0, sR, sR, sL],
-                   [s0, sR, sL, s0]])
+                   [s0, sR, sL, sL]])
 p     = 0.05 # Probability of faulty signal
 p_inv = 1 - p
 NV    = 4    # |V(G)|
