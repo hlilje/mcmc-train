@@ -17,40 +17,27 @@ sR0 = 3
 ### HMM parameters
 N  = 12                                  # Number of states (positions, (v, e) => |V(G)| x 3)
 M  = 4                                   # Number of possible observations
-# T  = 8                                   # Number of observations
 T  = 3                                   # Number of observations
 A  = np.matrix(np.ones(shape = (N, N)))  # Transition matrix (positions, always 1 due to fixed switches)
 B  = np.matrix(np.zeros(shape = (N, M))) # Observation matrix
 pi = np.matrix(np.zeros(shape = (1, N))) # Initial state probability distribution
-# O  = [0, 1, 3, 2, 1, 0, 2, 3]            # Observation sequence (signals)
 O  = [s0, sL, s0]                        # Observation sequence (signals)
 
 ### Model parameters
-# Graph over switches, switch x to y may be different from y to x.
-# Switches cannot be set to 0.
-# G  = np.matrix([[sX, s0, sL, sR],
-#                 [sR, sX, sL, s0],
-#                 [s0, sR, sX, sL],
-#                 [s0, sR, sL, sX]])
+# Graph over switches, switch x to y may be different from y to x
+# (Switches cannot be set to 0)
 G     = np.matrix([[sL, s0, sL, sR],
                    [sR, sR, sL, s0],
                    [s0, sR, sR, sL],
                    [s0, sR, sL, sL]])
-p     = 0.05 # Probability of faulty signal
-p_inv = 1.0 - p
-NV    = 4    # |V(G)|
+p     = 0.05    # Probability of faulty signal
+p_inv = 1.0 - p # Probability of correct signal
+NV    = 4       # |V(G)|
 
 """
 Initialise the HMM.
 """
 def init_hmm():
-    # Init matrix of size N x T and fill first column
-    # c = np.zeros(shape = (N, T))
-    # c[0].fill(1 / N) # Uniform prior
-    # c = np.matrix(c)
-    # c = c.getT()
-    # print(c)
-
     # Init transition matrix of size N x N
     # TODO Not row stochastic
     global A
@@ -263,9 +250,9 @@ def metropolis_hastings():
 if __name__ == '__main__':
     random.seed()
     init_hmm()
-    # print(calc_stop_obs_prob())
+    print(calc_stop_obs_prob())
 
     # Should be called on the stop position
-    print(c((0, (0, 1)), T)) # Worked
+    # print(c((0, (0, 1)), T)) # Worked
 
     # print("Generated samples:", metropolis_hastings())
