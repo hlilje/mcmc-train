@@ -26,7 +26,8 @@ pi = np.matrix(np.zeros(shape = (1, N))) # Initial state probability distributio
 O  = [s0, sL, s0]                        # Observation sequence (signals)
 
 ### Model parameters
-# Graph over switches, switch x to y may be different from y to x
+# Graph over switches, switch x to y may be different from y to x.
+# Switches cannot be set to 0.
 # G  = np.matrix([[sX, s0, sL, sR],
 #                 [sR, sX, sL, s0],
 #                 [s0, sR, sX, sL],
@@ -36,7 +37,7 @@ G     = np.matrix([[sL, s0, sL, sR],
                    [s0, sR, sR, sL],
                    [s0, sR, sL, sL]])
 p     = 0.05 # Probability of faulty signal
-p_inv = 1 - p
+p_inv = 1.0 - p
 NV    = 4    # |V(G)|
 
 """
@@ -104,8 +105,6 @@ def c(s, t):
     # Incident edges to v != e (reversed order from description)
     f = (u, v)
     g = (w, v)
-    # f = (v, u)
-    # g = (v, w)
 
     print("f:", f, "g:", g)
 
@@ -157,12 +156,12 @@ def c(s, t):
     ### Case 8
     if e_label == sL and v_switch == sR:
         print("Case 8")
-        return 0
+        return 0.0
 
     ### Case 9
     if e_label == sR and v_switch == sL:
         print("Case 9")
-        return 0
+        return 0.0
 
     print("No return value for (s, t):", s, t)
     print("g:", g, "f:", f)
@@ -173,7 +172,7 @@ def c(s, t):
 Calculates p(s, O | G, sigma)
 """
 def calc_stop_obs_prob():
-    prob_sum = 0
+    prob_sum = 0.0
 
     # Calculate total probability for all states (positions) by
     # finding all three edges from all vertices (assume deg(v) = 3)
@@ -212,7 +211,7 @@ Calculates p(O | G, sigma)
 """
 def calc_obs_prob():
     # TODO Sum out the stop position
-    return 0
+    return 0.0
 
 """
 Proposal distribution, a Gaussion distribution centred on x.
