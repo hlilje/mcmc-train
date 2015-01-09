@@ -3,6 +3,7 @@
 import random
 import numpy as np
 #import scipy as sp
+import fileinput
 
 ### Symbols for switch edges/positions and signals
 s0 = 0
@@ -16,7 +17,7 @@ sR0 = 3
 
 ### HMM parameters
 N  = 12                                  # Number of states (positions, (v, e) => |V(G)| x 3)
-M  = 4                                   # Number of possible observations
+M  = 3                                   # Number of possible observations
 T  = 3                                   # Number of observations
 A  = np.matrix(np.ones(shape = (N, N)))  # Transition matrix (positions, always 1 due to fixed switches)
 B  = np.matrix(np.zeros(shape = (N, M))) # Observation matrix
@@ -33,6 +34,38 @@ G     = np.matrix([[sL, s0, sL, sR],
 p     = 0.05    # Probability of faulty signal
 p_inv = 1.0 - p # Probability of correct signal
 NV    = 4       # |V(G)|
+
+"""
+Parses the given text file to generate data for G and observations.
+"""
+def read_data():
+    data = fileinput.input()
+
+    # Read number of possible observations and |V(G)|
+    global M, NV, G
+    M = int(next(data))
+    NV = int(next(data))
+    G = np.matrix(np.zeros(shape = (NV, NV)))
+
+    # Read G values
+    for i in range(NV):
+        values = next(data).split()
+        for j in range(NV):
+           G[i, j] = int(values[j])
+
+    # Read observation sequence length
+    global O, T
+    O = np.array(np.zeros(T))
+    T = int(next(data))
+
+    # Read observation sequence
+    values = next(data).split()
+    for i in range(T):
+        O[i] = int(values[i])
+
+    # Calculate number of states
+    global N
+    N = NV * 3
 
 """
 Initialise the HMM.
@@ -80,12 +113,12 @@ def c(s, t):
     w = 0
     end_ix = 0
     # Search through matrix to find the adjacent vertices, assume deg(v) == 3
-    for i in range(M):
+    for i in range(NV):
         if not np.isnan(G.item(v, i)) and i != e1 and i != e2:
             u = i
             end_ix = i
             break
-    for i in range(end_ix + 1, M):
+    for i in range(end_ix + 1, NV):
         if not np.isnan(G.item(v, i)) and i != e1 and i != e2 and i != u:
             w = i
             break
@@ -170,9 +203,9 @@ def calc_stop_obs_prob():
 
     # Calculate total probability for all states (positions) by
     # finding all three edges from all vertices (assume deg(v) = 3)
-    for v in range(M):
+    for v in range(NV):
         e = (v, 0)
-        for w in range(M):
+        for w in range(NV):
             if not np.isnan(G.item(v, w)) and w != v:
                 print("pick", w, "for", v)
                 e = (v, w)
@@ -181,7 +214,7 @@ def calc_stop_obs_prob():
         prob_sum = prob_sum + c((v, e), T)
         print(v, e)
 
-        for w in range(end_ix + 1, M):
+        for w in range(end_ix + 1, NV):
             if not np.isnan(G.item(v, w)) and w != v:
                 print("pick", w, "for", v)
                 e = (v, w)
@@ -190,7 +223,7 @@ def calc_stop_obs_prob():
         prob_sum = prob_sum + c((v, e), T)
         print(v, e)
 
-        for w in range(end_ix + 1, M):
+        for w in range(end_ix + 1, NV):
             if not np.isnan(G.item(v, w)) and w != v:
                 print("pick", w, "for", v)
                 e = (v, w)
@@ -249,10 +282,12 @@ def metropolis_hastings():
 
 if __name__ == '__main__':
     random.seed()
+    read_data()
     init_hmm()
-    print(calc_stop_obs_prob())
+    # print(calc_stop_obs_prob())
 
     # Should be called on the stop position
-    # print(c((0, (0, 1)), T)) # Worked
+    # print(c((0, (0, 1)), T))
 
-    # print("Generated samples:", metropolis_hastings())
+    print("Generated samples:")
+    print(metropolis_hastings())
