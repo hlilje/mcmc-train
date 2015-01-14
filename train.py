@@ -10,11 +10,6 @@ s0 = 0
 sL = 1
 sR = 2
 sX = np.nan # No switch/edge
-# TODO Currently not used
-s0L = 0
-s0R = 1
-sL0 = 2
-sR0 = 3
 
 ### HMM parameters
 N  = 0     # Number of states (positions, (v, e) => |V(G)| x 3)
@@ -24,6 +19,7 @@ A  = [[0]] # Transition matrix (positions, always 1 due to fixed switches)
 B  = [[0]] # Observation matrix
 pi = [[0]] # Initial state probability distribution
 O  = [0]   # Observation sequence (signals)
+C  = [[0]] # Matrix to store the c values
 
 ### Model parameters
 # Graph over switches, switch x to y may be different from y to x
@@ -67,23 +63,25 @@ Initialise the HMM.
 def init_hmm():
     # Init transition matrix of size N x N
     # TODO Not row stochastic
-    global A
+    global A, B, pi, C
     A = np.matrix(np.ones(shape = (N, N))) # Fixes switches
     # print(A)
 
     # Init observation matrix of size N x M
     # TODO Not row stochastic
-    global B
     B = np.matrix(np.zeros(shape = (N, M)))
     B.fill(1 / 2) # Prior for all switches
     # print(B)
 
     # Init initial prob dist matrix of size 0 x N
-    global pi
     pi = np.zeros(shape = (1, N))
     pi.fill(1 / N) # Uniform prior
     pi = np.matrix(pi)
     # print(pi)
+
+    # Init matrix for C values of size N x T
+    C = np.matrix(np.zeros(shape = (N, T)))
+    # print(C)
 
 """
 Recursively calculates the c value.
@@ -197,6 +195,9 @@ def calc_stop_obs_prob():
 
     # Calculate total probability for all states (positions) by
     # finding all three edges from all vertices (assume deg(v) = 3)
+    # TODO Not correct
+    # for t in range(1, T+1):
+    t = T
     for v in range(NV):
         e = (v, 0)
         for w in range(NV):
@@ -205,7 +206,7 @@ def calc_stop_obs_prob():
                 e = (v, w)
                 end_ix = w
                 break
-        prob_sum = prob_sum + c((v, e), T)
+        prob_sum = prob_sum + c((v, e), t)
         print(v, e)
 
         for w in range(end_ix + 1, NV):
@@ -214,7 +215,7 @@ def calc_stop_obs_prob():
                 e = (v, w)
                 end_ix = w
                 break
-        prob_sum = prob_sum + c((v, e), T)
+        prob_sum = prob_sum + c((v, e), t)
         print(v, e)
 
         for w in range(end_ix + 1, NV):
@@ -222,8 +223,8 @@ def calc_stop_obs_prob():
                 print("pick", w, "for", v)
                 e = (v, w)
                 break
-        prob_sum = prob_sum + c((v, e), T)
-        print((v, e), T, prob_sum)
+        prob_sum = prob_sum + c((v, e), t)
+        print((v, e), t, prob_sum)
 
     return prob_sum
 
@@ -240,7 +241,8 @@ Should match target distribution.
 """
 def q(x):
     # Centre, standard deviation (width), shape
-    return np.random.normal(x)
+    # return np.random.normal(x)
+    return np.random.randint(1, 3)
 
 """
 Metropolis-Hastings algorithm.
@@ -255,7 +257,8 @@ def metropolis_hastings():
     samples = []
 
     for i in range(iters):
-        xn = x + np.random.normal() # Normal proposal distribution, recent value
+        # xn = x + np.random.normal() # Normal proposal distribution, recent value
+        xn = np.random.randint(1, 3)
         pn = q(xn) # Sample from proposal distribution
 
         # Accept proposal immediately if it is better than previous
@@ -284,5 +287,5 @@ if __name__ == '__main__':
     # Should be called on the stop position
     # print(c((0, (0, 1)), T))
 
-    print("Generated samples:")
+    # print("Generated samples:")
     print(metropolis_hastings())
