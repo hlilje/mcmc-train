@@ -63,20 +63,21 @@ Initialise the HMM.
 """
 def init_hmm():
     # Init transition matrix of size N x N
-    # TODO Not row stochastic
     global A, B, pi, C
-    A = np.matrix(np.ones(shape = (N, N))) # Fixes switches
+    A = np.matrix(np.zeros(shape = (N, N)))
+    # Probability 1 for fixes switches
+    A.fill(1 / N) # Make row stochastic
     # print(A)
 
     # Init observation matrix of size N x M
-    # TODO Not row stochastic
     B = np.matrix(np.zeros(shape = (N, M)))
-    B.fill(1 / 2) # Prior for all switches
+    # 1 / 2 prior for all switches
+    B.fill((1 / 2) / (1 / 2 * M)) # Make row stochastic
     # print(B)
 
     # Init initial prob dist matrix of size 0 x N
     pi = np.zeros(shape = (1, N))
-    pi.fill(1 / N) # Uniform prior
+    pi.fill(1 / N) # Uniform prior, automatically row stochastic
     pi = np.matrix(pi)
     # print(pi)
 
