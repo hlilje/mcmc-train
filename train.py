@@ -90,7 +90,7 @@ def c(s, t):
     print("s:", s, "t:", t)
     ### Case 1
     if t == 0:
-        print(">>> Case 1")
+        print(">>> Case 1 (base case)")
         return 1 / NV
 
     # Values from position tuple
@@ -171,12 +171,12 @@ def c(s, t):
 
     ### Case 8
     if e_label == sL and v_switch == sR:
-        print(">>> Case 8")
+        print(">>> Case 8 (impossible path)")
         return 0.0
 
     ### Case 9
     if e_label == sR and v_switch == sL:
-        print(">>> Case 9")
+        print(">>> Case 9 (impossible path)")
         return 0.0
 
     print("NO RETURN VALUE FOR s:", s, "t:", t)
@@ -301,8 +301,8 @@ if __name__ == '__main__':
     # set_switch_settings()
     init_hmm()
 
-    print("G:")
-    print(G)
+    # print("G:")
+    # print(G)
 
     # print(calc_stop_obs_prob())
 
