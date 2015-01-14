@@ -298,14 +298,18 @@ def set_switch_settings():
 if __name__ == '__main__':
     random.seed()
     read_data()
-    set_switch_settings()
+    # set_switch_settings()
     init_hmm()
+
+    print("G:")
+    print(G)
 
     # print(calc_stop_obs_prob())
 
     # Should be called on the stop position
+    # print("Correct stop position probability:", c((0, (0, 1)), T))
     print("Correct stop position probability:", c((6, (6, 1)), T))
-    # print("Incorrectstop position probability:", c((0, (0, 1)), T))
+    # print("Incorrectstop position probability:", c((2, (2, 5)), T))
 
     # print("Generated samples:")
     # print(metropolis_hastings())
