@@ -278,6 +278,13 @@ def metropolis_hastings():
 
     return np.array(samples)
 
+"""
+Wrapper method which uses MH to sample as many switch
+settings (sigmas) as given by n.
+"""
+def generate_switch_settings(n):
+    return metropolis_hastings()[:n]
+
 if __name__ == '__main__':
     random.seed()
     read_data()
@@ -290,3 +297,5 @@ if __name__ == '__main__':
 
     # print("Generated samples:")
     # print(metropolis_hastings())
+
+    print(generate_switch_settings(8))
