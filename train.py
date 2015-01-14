@@ -6,7 +6,7 @@ import numpy as np
 import fileinput
 
 ### Symbols for switch edges/positions and signals
-s0 = 0
+s0 = 0 # Only valid edge, no switch setting
 sL = 1
 sR = 2
 sX = 3 # No switch/edge
@@ -107,12 +107,12 @@ def c(s, t):
     end_ix = 0
     # Search through matrix to find the adjacent vertices, assume deg(v) == 3
     for i in range(NV):
-        if not np.isnan(G.item(v, i)) and i != e1 and i != e2:
+        if G.item(v, i) != sX and i != e1 and i != e2:
             u = i
             end_ix = i
             break
     for i in range(end_ix + 1, NV):
-        if not np.isnan(G.item(v, i)) and i != e1 and i != e2 and i != u:
+        if G.item(v, i) != sX and i != e1 and i != e2 and i != u:
             w = i
             break
     # Incident edges to v != e (reversed order from description)
@@ -202,7 +202,7 @@ def calc_stop_obs_prob():
     for v in range(NV):
         e = (v, 0)
         for w in range(NV):
-            if not np.isnan(G.item(v, w)) and w != v:
+            if G.item(v, w) != sX and w != v:
                 print("pick", w, "for", v)
                 e = (v, w)
                 end_ix = w
@@ -211,7 +211,7 @@ def calc_stop_obs_prob():
         print(v, e)
 
         for w in range(end_ix + 1, NV):
-            if not np.isnan(G.item(v, w)) and w != v:
+            if G.item(v, w) != sX and w != v:
                 print("pick", w, "for", v)
                 e = (v, w)
                 end_ix = w
@@ -220,7 +220,7 @@ def calc_stop_obs_prob():
         print(v, e)
 
         for w in range(end_ix + 1, NV):
-            if not np.isnan(G.item(v, w)) and w != v:
+            if G.item(v, w) != sX and w != v:
                 print("pick", w, "for", v)
                 e = (v, w)
                 break
@@ -289,4 +289,4 @@ if __name__ == '__main__':
     # print(c((0, (0, 1)), T))
 
     # print("Generated samples:")
-    print(metropolis_hastings())
+    # print(metropolis_hastings())
