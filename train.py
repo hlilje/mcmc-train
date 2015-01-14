@@ -285,9 +285,22 @@ settings (sigmas) as given by n.
 def generate_switch_settings(n):
     return metropolis_hastings()[:n]
 
+"""
+Populates the graph G with generate switch settings.
+"""
+def set_switch_settings():
+    sigmas = generate_switch_settings(NV)
+
+    # Populate the diagonal
+    j = 0
+    for i in range(NV):
+        G[i, j] = sigmas[i]
+        j = j + 1
+
 if __name__ == '__main__':
     random.seed()
     read_data()
+    set_switch_settings()
     init_hmm()
 
     # print(calc_stop_obs_prob())
@@ -297,5 +310,3 @@ if __name__ == '__main__':
 
     # print("Generated samples:")
     # print(metropolis_hastings())
-
-    print(generate_switch_settings(8))
