@@ -23,10 +23,10 @@ C  = [[0]] # Matrix to store the c values
 
 ### Model parameters
 # Graph over switches, switch x to y may be different from y to x
-G     = [[0]]
-p     = 0.05    # Probability of faulty signal
-p_inv = 1.0 - p # Probability of correct signal
-NV    = 0       # |V(G)|
+G      = [[0]]
+p      = 0.05    # Probability of faulty signal
+p_comp = 1.0 - p # Probability of correct signal
+NV     = 0       # |V(G)|
 
 """
 Parses the given text file to generate data for G and observations.
@@ -122,7 +122,7 @@ def c(s, t):
     e_label = G.item(e1, e2)
     f_label = G.item(v, u) # f at v
     v_switch = G.item(v, v)
-    obs = O[t - 1]
+    obs = O[t - 1] # O is 0-indexed, t is not
     t_prev = t - 1
     s1 = (u, f)
     s2 = (w, g)
@@ -132,7 +132,7 @@ def c(s, t):
     ### Case 2
     if e_label == s0 and obs == s0:
         print(">>> Case 2")
-        return (c(s1, t_prev) + c(s2, t_prev)) * p_inv
+        return (c(s1, t_prev) + c(s2, t_prev)) * p_comp
 
     ### Case 3
     if e_label == s0 and obs != s0:
@@ -146,7 +146,7 @@ def c(s, t):
     #         and f_label == s0:
     if e_label == sL and v_switch == sL and obs == sL:
         print(">>> Case 4")
-        return c(s1, t_prev) * p_inv
+        return c(s1, t_prev) * p_comp
 
     ### Case 5
     # if e_label == sL and v_switch == sL and obs != sL \
@@ -160,7 +160,7 @@ def c(s, t):
     #         and f_label == s0:
     if e_label == sR and v_switch == sR and obs == sR:
         print(">>> Case 6")
-        return c(s1, t_prev) * p_inv
+        return c(s1, t_prev) * p_comp
 
     ### Case 7
     # if e_label == sR and v_switch == sR and obs != sR \
@@ -298,17 +298,17 @@ def set_switch_settings():
 if __name__ == '__main__':
     random.seed()
     read_data()
-    # set_switch_settings()
+    set_switch_settings()
     init_hmm()
 
     # print("G:")
     # print(G)
 
-    # print(calc_stop_obs_prob())
+    print(calc_stop_obs_prob())
 
     # Should be called on the stop position
     # print("Correct stop position probability:", c((0, (0, 1)), T))
-    print("Correct stop position probability:", c((6, (6, 1)), T))
+    # print("Correct stop position probability:", c((6, (6, 1)), T))
     # print("Incorrectstop position probability:", c((2, (2, 5)), T))
 
     # print("Generated samples:")
