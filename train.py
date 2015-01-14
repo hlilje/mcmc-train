@@ -9,7 +9,7 @@ import fileinput
 s0 = 0
 sL = 1
 sR = 2
-sX = np.nan # No switch/edge
+sX = 3 # No switch/edge
 
 ### HMM parameters
 N  = 0     # Number of states (positions, (v, e) => |V(G)| x 3)
@@ -36,8 +36,9 @@ def read_data():
 
     # Read number of possible observations, |V(G)| and calculate
     # number of states
-    global M, NV, G, O, T, N
+    global M, sX, NV, G, O, T, N
     M = int(next(data))
+    sX = M # Invalid symbol = last (0-indexed) index + 1
     NV = int(next(data))
     N = NV * 3
     G = np.matrix(np.zeros(shape = (NV, NV)))
