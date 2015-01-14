@@ -23,7 +23,7 @@ C  = [[0]] # Matrix to store the c values
 
 ### Model parameters
 # Graph over switches, switch x to y may be different from y to x
-G     = [[0]]   # (Switches cannot be set to 0)
+G     = [[0]]
 p     = 0.05    # Probability of faulty signal
 p_inv = 1.0 - p # Probability of correct signal
 NV    = 0       # |V(G)|
