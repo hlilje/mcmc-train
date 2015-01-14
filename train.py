@@ -239,7 +239,9 @@ Should match target distribution.
 def q(x):
     # Centre, standard deviation (width), shape
     # return np.random.normal(x)
-    return np.random.randint(1, 3)
+    # return np.random.randint(1, 3)
+    # Number of experiments, probabilities, size
+    return np.argmax(np.random.multinomial(20, [1/2]*2, size = 1))
 
 """
 Metropolis-Hastings algorithm.
@@ -304,12 +306,12 @@ if __name__ == '__main__':
     # print("G:")
     # print(G)
 
-    print(calc_stop_obs_prob())
+    # print(calc_stop_obs_prob())
 
     # Should be called on the stop position
     # print("Correct stop position probability:", c((0, (0, 1)), T))
     # print("Correct stop position probability:", c((6, (6, 1)), T))
     # print("Incorrectstop position probability:", c((2, (2, 5)), T))
 
-    # print("Generated samples:")
-    # print(metropolis_hastings())
+    print("Generated samples:")
+    print(metropolis_hastings())
