@@ -67,23 +67,19 @@ def init_hmm():
     A = np.matrix(np.zeros(shape = (N, N)))
     # Probability 1 for fixes switches
     A.fill(1 / N) # Make row stochastic
-    # print(A)
 
     # Init observation matrix of size N x M
     B = np.matrix(np.zeros(shape = (N, M)))
     # 1 / 2 prior for all switches
     B.fill((1 / 2) / (1 / 2 * M)) # Make row stochastic
-    # print(B)
 
     # Init initial prob dist matrix of size 0 x N
     pi = np.zeros(shape = (1, N))
     pi.fill(1 / N) # Uniform prior, automatically row stochastic
     pi = np.matrix(pi)
-    # print(pi)
 
     # Init matrix for C values of size N x T
     C = np.matrix(np.zeros(shape = (N, T)))
-    # print(C)
 
 """
 Recursively calculates the c value.
@@ -163,7 +159,6 @@ def c(s, t):
     # if e_label == sR and v_switch == sR and obs == sR \
     #         and f_label == s0:
     if e_label == sR and v_switch == sR and obs == sR:
-            # and f_label == s0:
         print(">>> Case 6")
         return c(s1, t_prev) * p_inv
 
@@ -184,7 +179,7 @@ def c(s, t):
         print(">>> Case 9")
         return 0.0
 
-    print("No return value for s:", s, "t:", t)
+    print("NO RETURN VALUE FOR s:", s, "t:", t)
     print("g:", g, "f:", f)
     print("f label at v:", f_label)
     print("v value:", v_switch)
@@ -292,6 +287,8 @@ Populates the graph G with generate switch settings.
 def set_switch_settings():
     sigmas = generate_switch_settings(NV)
 
+    print("Switch settings:", sigmas)
+
     # Populate the diagonal
     j = 0
     for i in range(NV):
@@ -307,7 +304,8 @@ if __name__ == '__main__':
     # print(calc_stop_obs_prob())
 
     # Should be called on the stop position
-    # print(c((0, (0, 1)), T))
+    print("Correct stop position probability:", c((6, (6, 1)), T))
+    # print("Incorrectstop position probability:", c((0, (0, 1)), T))
 
     # print("Generated samples:")
     # print(metropolis_hastings())
