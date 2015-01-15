@@ -4,6 +4,7 @@ import random
 import numpy as np
 #import scipy as sp
 import fileinput
+import graph
 
 ### Symbols for switch edges/positions and signals
 s0 = 0 # Only valid edge, no switch setting
