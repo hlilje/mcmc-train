@@ -7,7 +7,7 @@ from graph import Graph
 class HMM:
     ### HMM parameters
     N  = 0     # Number of states (positions, (v, e) => |V(G)| x 3)
-    M  = 0     # Number of possible observations
+    M  = 3     # Number of possible observations
     T  = 0     # Number of observations
     A  = [[0]] # Transition matrix (positions, always 1 due to fixed switches)
     B  = [[0]] # Observation matrix
@@ -20,9 +20,8 @@ class HMM:
     """
     Sets the given data to this HMM.
     """
-    def set_data(self, N, M):
+    def set_data(self, N):
         self.N = N
-        self.M = M
         self.set_obserations()
         self.init_hmm()
 

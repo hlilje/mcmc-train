@@ -6,7 +6,6 @@ import numpy as np
 
 from graph import Graph
 from hmm import HMM
-from parser import Parser
 
 p      = 0.05    # Probability of faulty signal
 p_comp = 1.0 - p # Probability of correct signal
@@ -215,12 +214,9 @@ if __name__ == '__main__':
 
     GR = Graph()
     HM = HMM()
-    PR = Parser()
+    HM.set_data(GR.NV * 3) # Initialise HMM with number of states
 
-    PR.read_data(GR, HM)
-
-    # print("G:")
-    # print(GR.G)
+    print(GR.G)
 
     # print(calc_stop_obs_prob())
 
