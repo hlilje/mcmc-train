@@ -241,7 +241,7 @@ def q(x):
     # return np.random.normal(x)
     # return np.random.randint(1, 3)
     # Number of experiments, probabilities, size
-    return np.argmax(np.random.multinomial(20, [1/2]*2, size = 1))
+    return np.argmax(np.random.multinomial(20, [1 / 2] * 2, size = 1))
 
 """
 Metropolis-Hastings algorithm.
@@ -299,9 +299,9 @@ def set_switch_settings():
 
 if __name__ == '__main__':
     random.seed()
-    read_data()
-    set_switch_settings()
-    init_hmm()
+    # read_data()
+    # set_switch_settings()
+    # init_hmm()
 
     # print("G:")
     # print(G)
