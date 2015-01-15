@@ -49,14 +49,43 @@ def read_data():
         for j in range(NV):
            G[i, j] = int(values[j])
 
+    # TODO Should maybe be generated instead
     # Read observation sequence length
-    T = int(next(data))
-    O = np.array(np.zeros(T))
+    # T = int(next(data))
+    # O = np.array(np.zeros(T))
 
     # Read observation sequence
-    values = next(data).split()
-    for i in range(T):
-        O[i] = int(values[i])
+    # values = next(data).split()
+    # for i in range(T):
+    #     O[i] = int(values[i])
+
+"""
+Generate a plausible stream of observations.
+"""
+def generate_observations(n):
+    obs = np.random.randint(0, M) # Initial observation
+    observations = [obs]
+
+    for i in range(n - 1):
+        if obs == s0:
+            obs = np.random.randint(1, M)
+            observations.append(obs)
+        elif obs == sL or obs == sR:
+            obs = s0
+            observations.append(obs)
+
+    return observations
+
+"""
+Wrapper method which sets the generated sequence of observations.
+"""
+def set_obserations():
+    global T, O
+    T = 10
+    O = np.array(np.zeros(T))
+    O = generate_observations(T)
+
+    print("Observations:", O)
 
 """
 Initialise the HMM.
@@ -300,13 +329,14 @@ def set_switch_settings():
 if __name__ == '__main__':
     random.seed()
     read_data()
+    set_obserations()
     set_switch_settings()
     init_hmm()
 
     # print("G:")
     # print(G)
 
-    print(calc_stop_obs_prob())
+    # print(calc_stop_obs_prob())
 
     # Should be called on the stop position
     # print("Correct stop position probability:", c((0, (0, 1)), T))
