@@ -3,113 +3,16 @@
 import random
 import numpy as np
 #import scipy as sp
-import fileinput
-import graph
 
-### Symbols for switch edges/positions and signals
-s0 = 0 # Only valid edge, no switch setting
-sL = 1
-sR = 2
-sX = 3 # No switch/edge
+from graph import Graph
+from hmm import HMM
+from parser import Parser
 
-### HMM parameters
-N  = 0     # Number of states (positions, (v, e) => |V(G)| x 3)
-M  = 0     # Number of possible observations
-T  = 0     # Number of observations
-A  = [[0]] # Transition matrix (positions, always 1 due to fixed switches)
-B  = [[0]] # Observation matrix
-pi = [[0]] # Initial state probability distribution
-O  = [0]   # Observation sequence (signals)
-C  = [[0]] # Matrix to store the c values
-
-### Model parameters
-# Graph over switches, switch x to y may be different from y to x
-G      = [[0]]
 p      = 0.05    # Probability of faulty signal
 p_comp = 1.0 - p # Probability of correct signal
-NV     = 0       # |V(G)|
-
-"""
-Parses the given text file to generate data for G and observations.
-"""
-def read_data():
-    data = fileinput.input()
-
-    # Read number of possible observations, |V(G)| and calculate
-    # number of states
-    global M, sX, NV, G, O, T, N
-    M = int(next(data))
-    sX = M # Invalid symbol = last (0-indexed) index + 1
-    NV = int(next(data))
-    N = NV * 3
-    G = np.matrix(np.zeros(shape = (NV, NV)))
-
-    # Read G values
-    for i in range(NV):
-        values = next(data).split()
-        for j in range(NV):
-           G[i, j] = int(values[j])
-
-    # TODO Should maybe be generated instead
-    # Read observation sequence length
-    # T = int(next(data))
-    # O = np.array(np.zeros(T))
-
-    # Read observation sequence
-    # values = next(data).split()
-    # for i in range(T):
-    #     O[i] = int(values[i])
-
-"""
-Generate a plausible stream of observations.
-"""
-def generate_observations(n):
-    obs = np.random.randint(0, M) # Initial observation
-    observations = [obs]
-
-    for i in range(n - 1):
-        if obs == s0:
-            obs = np.random.randint(1, M)
-            observations.append(obs)
-        elif obs == sL or obs == sR:
-            obs = s0
-            observations.append(obs)
-
-    return observations
-
-"""
-Wrapper method which sets the generated sequence of observations.
-"""
-def set_obserations():
-    global T, O
-    T = 10
-    O = np.array(np.zeros(T))
-    O = generate_observations(T)
-
-    print("Observations:", O)
-
-"""
-Initialise the HMM.
-"""
-def init_hmm():
-    # Init transition matrix of size N x N
-    global A, B, pi, C
-    A = np.matrix(np.zeros(shape = (N, N)))
-    # Probability 1 for fixes switches
-    A.fill(1 / N) # Make row stochastic
-
-    # Init observation matrix of size N x M
-    B = np.matrix(np.zeros(shape = (N, M)))
-    # 1 / 2 prior for all switches
-    B.fill((1 / 2) / (1 / 2 * M)) # Make row stochastic
-
-    # Init initial prob dist matrix of size 0 x N
-    pi = np.zeros(shape = (1, N))
-    pi.fill(1 / N) # Uniform prior, automatically row stochastic
-    pi = np.matrix(pi)
-
-    # Init matrix for C values of size N x T
-    C = np.matrix(np.zeros(shape = (N, T)))
+GR     = 0       # Graph object
+HM     = 0       # HMM object
+PR     = 0       # Parser object
 
 """
 Recursively calculates the c value.
@@ -121,7 +24,7 @@ def c(s, t):
     ### Case 1
     if t == 0:
         print(">>> Case 1 (base case)")
-        return 1 / NV
+        return 1 / GR.NV
 
     # Values from position tuple
     v = s[0] # vertex
@@ -133,13 +36,13 @@ def c(s, t):
     w = 0
     end_ix = 0
     # Search through matrix to find the adjacent vertices, assume deg(v) == 3
-    for i in range(NV):
-        if G.item(v, i) != sX and i != e1 and i != e2:
+    for i in range(GR.NV):
+        if GR.G.item(v, i) != GR.sX and i != e1 and i != e2:
             u = i
             end_ix = i
             break
-    for i in range(end_ix + 1, NV):
-        if G.item(v, i) != sX and i != e1 and i != e2 and i != u:
+    for i in range(end_ix + 1, GR.NV):
+        if GR.G.item(v, i) != GR.sX and i != e1 and i != e2 and i != u:
             w = i
             break
     # Incident edges to v != e (reversed order from description)
@@ -149,10 +52,11 @@ def c(s, t):
     print("f:", f, "g:", g)
 
     # Assumes only edge e1 (v) -> e2 should be considered, since e is exit edge
-    e_label = G.item(e1, e2)
-    f_label = G.item(v, u) # f at v
-    v_switch = G.item(v, v)
-    obs = O[t - 1] # O is 0-indexed, t is not
+    e_label = GR.G.item(e1, e2)
+    # TODO Make sure f is the 0 edge
+    f_label = GR.G.item(v, u) # f at v
+    v_switch = GR.G.item(v, v)
+    obs = HM.O[t - 1] # O is 0-indexed, t is not
     t_prev = t - 1
     s1 = (u, f)
     s2 = (w, g)
@@ -160,52 +64,52 @@ def c(s, t):
     print("e label:", e_label, "f label:", f_label, "v switch:", v_switch)
 
     ### Case 2
-    if e_label == s0 and obs == s0:
+    if e_label == Graph.s0 and obs == Graph.s0:
         print(">>> Case 2")
         return (c(s1, t_prev) + c(s2, t_prev)) * p_comp
 
     ### Case 3
-    if e_label == s0 and obs != s0:
+    if e_label == Graph.s0 and obs != Graph.s0:
         print(">>> Case 3")
         return (c(s1, t_prev) + c(s2, t_prev)) * p
 
     # TODO Does not work with the f == 0 constraint
 
     ### Case 4
-    # if e_label == sL and v_switch == sL and obs == sL \
-    #         and f_label == s0:
-    if e_label == sL and v_switch == sL and obs == sL:
+    # if e_label == Graph.sL and v_switch == Graph.sL and obs == Graph.sL \
+    #         and f_label == Graph.s0:
+    if e_label == Graph.sL and v_switch == Graph.sL and obs == Graph.sL:
         print(">>> Case 4")
         return c(s1, t_prev) * p_comp
 
     ### Case 5
-    # if e_label == sL and v_switch == sL and obs != sL \
-    #         and f_label == s0:
-    if e_label == sL and v_switch == sL and obs != sL:
+    # if e_label == Graph.sL and v_switch == Graph.sL and obs != Graph.sL \
+    #         and f_label == Graph.s0:
+    if e_label == Graph.sL and v_switch == Graph.sL and obs != Graph.sL:
         print(">>> Case 5")
         return c(s1, t_prev) * p
 
     ### Case 6
-    # if e_label == sR and v_switch == sR and obs == sR \
-    #         and f_label == s0:
-    if e_label == sR and v_switch == sR and obs == sR:
+    # if e_label == Graph.sR and v_switch == Graph.sR and obs == Graph.sR \
+    #         and f_label == Graph.s0:
+    if e_label == Graph.sR and v_switch == Graph.sR and obs == Graph.sR:
         print(">>> Case 6")
         return c(s1, t_prev) * p_comp
 
     ### Case 7
-    # if e_label == sR and v_switch == sR and obs != sR \
-    #         and f_label == s0:
-    if e_label == sR and v_switch == sR and obs != sR:
+    # if e_label == Graph.sR and v_switch == Graph.sR and obs != Graph.sR \
+    #         and f_label == Graph.s0:
+    if e_label == Graph.sR and v_switch == Graph.sR and obs != Graph.sR:
         print(">>> Case 7")
         return c(s1, t_prev) * p
 
     ### Case 8
-    if e_label == sL and v_switch == sR:
+    if e_label == Graph.sL and v_switch == Graph.sR:
         print(">>> Case 8 (impossible path)")
         return 0.0
 
     ### Case 9
-    if e_label == sR and v_switch == sL:
+    if e_label == Graph.sR and v_switch == Graph.sL:
         print(">>> Case 9 (impossible path)")
         return 0.0
 
@@ -224,11 +128,11 @@ def calc_stop_obs_prob():
     # finding all three edges from all vertices (assume deg(v) = 3)
     # TODO Not correct
     # for t in range(1, T+1):
-    t = T
-    for v in range(NV):
+    t = HM.T
+    for v in range(GR.NV):
         e = (v, 0)
-        for w in range(NV):
-            if G.item(v, w) != sX and w != v:
+        for w in range(GR.NV):
+            if GR.G.item(v, w) != GR.sX and w != v:
                 print("pick", w, "for", v)
                 e = (v, w)
                 end_ix = w
@@ -236,8 +140,8 @@ def calc_stop_obs_prob():
         prob_sum = prob_sum + c((v, e), t)
         print(v, e)
 
-        for w in range(end_ix + 1, NV):
-            if G.item(v, w) != sX and w != v:
+        for w in range(end_ix + 1, GR.NV):
+            if GR.G.item(v, w) != GR.sX and w != v:
                 print("pick", w, "for", v)
                 e = (v, w)
                 end_ix = w
@@ -245,8 +149,8 @@ def calc_stop_obs_prob():
         prob_sum = prob_sum + c((v, e), t)
         print(v, e)
 
-        for w in range(end_ix + 1, NV):
-            if G.item(v, w) != sX and w != v:
+        for w in range(end_ix + 1, GR.NV):
+            if GR.G.item(v, w) != GR.sX and w != v:
                 print("pick", w, "for", v)
                 e = (v, w)
                 break
@@ -306,36 +210,17 @@ def metropolis_hastings():
 
     return np.array(samples)
 
-"""
-Wrapper method which uses MH to sample as many switch
-settings (sigmas) as given by n.
-"""
-def generate_switch_settings(n):
-    return np.random.randint(1, 3, size = NV)
-
-"""
-Populates the graph G with generate switch settings.
-"""
-def set_switch_settings():
-    sigmas = generate_switch_settings(NV)
-
-    print("Switch settings:", sigmas)
-
-    # Populate the diagonal
-    j = 0
-    for i in range(NV):
-        G[i, j] = sigmas[i]
-        j = j + 1
-
 if __name__ == '__main__':
     random.seed()
-    read_data()
-    set_obserations()
-    set_switch_settings()
-    init_hmm()
+
+    GR = Graph()
+    HM = HMM()
+    PR = Parser()
+
+    PR.read_data(GR, HM)
 
     # print("G:")
-    # print(G)
+    # print(GR.G)
 
     # print(calc_stop_obs_prob())
 
