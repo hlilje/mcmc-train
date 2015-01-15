@@ -281,7 +281,7 @@ Wrapper method which uses MH to sample as many switch
 settings (sigmas) as given by n.
 """
 def generate_switch_settings(n):
-    return metropolis_hastings()[:n]
+    return np.random.randint(1, 3, size = NV)
 
 """
 Populates the graph G with generate switch settings.
@@ -299,19 +299,19 @@ def set_switch_settings():
 
 if __name__ == '__main__':
     random.seed()
-    # read_data()
-    # set_switch_settings()
-    # init_hmm()
+    read_data()
+    set_switch_settings()
+    init_hmm()
 
     # print("G:")
     # print(G)
 
-    # print(calc_stop_obs_prob())
+    print(calc_stop_obs_prob())
 
     # Should be called on the stop position
     # print("Correct stop position probability:", c((0, (0, 1)), T))
     # print("Correct stop position probability:", c((6, (6, 1)), T))
     # print("Incorrectstop position probability:", c((2, (2, 5)), T))
 
-    print("Generated samples:")
-    print(metropolis_hastings())
+    # print("Generated samples:")
+    # print(metropolis_hastings())
