@@ -76,30 +76,30 @@ def c(s, t):
     # TODO Does not work with the f == 0 constraint
 
     ### Case 4
-    # if e_label == Constants.sL and v_switch == Constants.sL and obs == Constants.sL \
-    #         and f_label == Constants.s0:
-    if e_label == Constants.sL and v_switch == Constants.sL and obs == Constants.sL:
+    if e_label == Constants.sL and v_switch == Constants.sL and obs == Constants.sL \
+            and f_label == Constants.s0:
+    # if e_label == Constants.sL and v_switch == Constants.sL and obs == Constants.sL:
         print(">>> Case 4")
         return c(s1, t_prev) * p_comp
 
     ### Case 5
-    # if e_label == Constants.sL and v_switch == Constants.sL and obs != Constants.sL \
-    #         and f_label == Constants.s0:
-    if e_label == Constants.sL and v_switch == Constants.sL and obs != Constants.sL:
+    if e_label == Constants.sL and v_switch == Constants.sL and obs != Constants.sL \
+            and f_label == Constants.s0:
+    # if e_label == Constants.sL and v_switch == Constants.sL and obs != Constants.sL:
         print(">>> Case 5")
         return c(s1, t_prev) * p
 
     ### Case 6
-    # if e_label == Constants.sR and v_switch == Constants.sR and obs == Constants.sR \
-    #         and f_label == Constants.s0:
-    if e_label == Constants.sR and v_switch == Constants.sR and obs == Constants.sR:
+    if e_label == Constants.sR and v_switch == Constants.sR and obs == Constants.sR \
+            and f_label == Constants.s0:
+    # if e_label == Constants.sR and v_switch == Constants.sR and obs == Constants.sR:
         print(">>> Case 6")
         return c(s1, t_prev) * p_comp
 
     ### Case 7
-    # if e_label == Constants.sR and v_switch == Constants.sR and obs != Constants.sR \
-    #         and f_label == Constants.s0:
-    if e_label == Constants.sR and v_switch == Constants.sR and obs != Constants.sR:
+    if e_label == Constants.sR and v_switch == Constants.sR and obs != Constants.sR \
+            and f_label == Constants.s0:
+    # if e_label == Constants.sR and v_switch == Constants.sR and obs != Constants.sR:
         print(">>> Case 7")
         return c(s1, t_prev) * p
 
@@ -217,7 +217,7 @@ if __name__ == '__main__':
     # Initialise HMM with number of states
     HM = HMM(GR.NV * HMM.M)
 
-    # print(calc_stop_obs_prob())
+    print(calc_stop_obs_prob())
 
     # Should be called on the stop position
     print("Stop position probability:", c((6, (6, 1)), HM.T))
