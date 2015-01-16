@@ -70,7 +70,7 @@ class HMM:
         # Initial edge type
         obs = np.random.randint(0, self.M)
         observations = [obs]
-        path = []
+        path = [] # Only for debug
 
         # Initialisation of path
         u = np.random.randint(0, self.GR.NV)
@@ -80,13 +80,13 @@ class HMM:
                 u = i
 
         # First observation already set
-        for i in range(n):
+        for i in range(n - 1):
             if obs == Constants.s0:
                 # Randomise obs != s0
                 obs = np.random.randint(1, self.M)
                 for j in range(self.GR.NV):
                     # Make sure not going back and find the edge
-                    if i != u and self.GR.G.item(u, j) == obs:
+                    if j != u and self.GR.G.item(u, j) == obs:
                         observations.append(obs)
                         u_old = u
                         u = j
@@ -96,14 +96,23 @@ class HMM:
                 # Must be s0
                 obs = Constants.s0
                 for j in range(self.GR.NV):
-                    if i != u and self.GR.G.item(u, j) == obs:
+                    if j != u and self.GR.G.item(u, j) == obs:
                         observations.append(obs)
                         u_old = u
                         u = j
                         path.append((u_old, u))
                         break
 
-        print(path)
+        observations = np.array(observations)
+
+        print("Unmolested observations:")
+        print(observations)
+
+        # Obfuscate observations with a probability
+        for i in range(n):
+            r = np.random.randint(0, 100)
+            if r < Constants.probability_faulty * 100:
+                observations[r] = np.random.randint(0, self.M)
 
         return observations
 
@@ -114,4 +123,5 @@ class HMM:
         self.O = np.array(np.zeros(self.T))
         self.O = self.generate_path_observations(self.T)
 
-        print("Observations:", self.O)
+        print("Observations:")
+        print(self.O)
