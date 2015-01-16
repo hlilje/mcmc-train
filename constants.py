@@ -16,3 +16,7 @@ class Constants:
     # Limits for possible switch settings
     switch_lower  = sL
     switch_higher = sR
+
+    # Probabilities
+    probability_faulty   = 0.05
+    probability_correct  = 1.0 - probability_faulty

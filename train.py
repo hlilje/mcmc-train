@@ -7,10 +7,10 @@ from constants import Constants
 from graph import Graph
 from hmm import HMM
 
-p      = 0.05    # Probability of faulty signal
-p_comp = 1.0 - p # Probability of correct signal
-GR     = 0       # Graph object
-HM     = 0       # HMM object
+p      = Constants.probability_faulty  # Probability of faulty signal
+p_comp = Constants.probability_correct # Probability of correct signal
+GR     = 0                             # Graph object
+HM     = 0                             # HMM object
 
 """
 Recursively calculates the c value.
