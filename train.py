@@ -44,6 +44,7 @@ def c(s, t):
             w = i
             break
     # Incident edges to v != e (reversed order from description)
+    # TODO Make sure f is the 0 edge
     f = (u, v)
     g = (w, v)
 
@@ -51,7 +52,6 @@ def c(s, t):
 
     # Assumes only edge e1 (v) -> e2 should be considered, since e is exit edge
     e_label = GR.G.item(e1, e2)
-    # TODO Make sure f is the 0 edge
     f_label = GR.G.item(v, u) # f at v
     v_switch = GR.G.item(v, v)
     obs = HM.O[t - 1] # O is 0-indexed, t is not
@@ -124,7 +124,7 @@ def calc_stop_obs_prob():
 
     # Calculate total probability for all states (positions) by
     # finding all three edges from all vertices (assume deg(v) = 3)
-    # TODO Not correct
+    # TODO Probably not correct
     # for t in range(1, T+1):
     t = HM.T
     for v in range(GR.NV):
@@ -189,7 +189,7 @@ def metropolis_hastings():
 
     for i in range(iters):
         # xn = x + np.random.normal() # Normal proposal distribution, recent value
-        xn = np.random.randint(1, 3)
+        xn = np.random.randint(Constants.switch_lower, Constants.switch_higher + 1)
         pn = q(xn) # Sample from proposal distribution
 
         # Accept proposal immediately if it is better than previous
@@ -212,7 +212,8 @@ if __name__ == '__main__':
     random.seed()
 
     GR = Graph()
-    HM = HMM(GR.NV * 3) # Initialise HMM with number of states
+    # Initialise HMM with number of states
+    HM = HMM(GR.NV * HMM.M)
 
     # print(calc_stop_obs_prob())
 

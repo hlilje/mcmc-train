@@ -7,7 +7,7 @@ class HMM:
     ### HMM parameters
     N  = 0                               # Number of states (positions, (v, e) => |V(G)| x 3)
     M  = Constants.possible_observations # Number of possible observations
-    T  = 0                               # Number of observations
+    T  = Constants.observation_count     # Number of observations
     A  = [[0]]                           # Transition matrix (positions, always 1 due to fixed switches)
     B  = [[0]]                           # Observation matrix
     pi = [[0]]                           # Initial state probability distribution
@@ -63,7 +63,6 @@ class HMM:
     Wrapper method which sets the generated sequence of observations.
     """
     def set_obserations(self):
-        self.T = 10
         self.O = np.array(np.zeros(self.T))
         self.O = self.generate_observations(self.T)
 

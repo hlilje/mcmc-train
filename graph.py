@@ -11,11 +11,14 @@ class Graph:
     ### Model parameters
     # Graph over switches, switch x to y may be different from y to x
     G  = [[0]]
-    NV = 8 # |V(G)|
+    NV = Constants.vertices_count # |V(G)|
+    M  = Constants.possible_observations
 
     def __init__(self):
         self.generate_graph(self.NV)
         self.set_switch_settings()
+        print("G:")
+        print(self.G)
 
     """
     Generates a graph of size n.
@@ -33,7 +36,7 @@ class Graph:
             # Generate values for every vertex in G
             for i in range(self.NV):
                 # Create three edges
-                for j in range(3):
+                for j in range(self.M):
                     if not self.full_neighbours(self.G[i, :]):
                         to = 0
                         label = Constants.sX
@@ -58,35 +61,37 @@ class Graph:
                             if tries == 10000:
                                 failed = True
                                 break
+
             invalid_generation = failed if True else False
+
         print("Graph generated in", total_tries, "tries")
-        print(self.G)
 
     """
     Helper method to create a unique label
     """
     def create_label(self, array):
-        label = random.randint(0, 2)
+        label = random.randint(0, self.M - 1)
         while label in array:
-            label = random.randint(0, 2)
+            label = random.randint(0, self.M - 1)
         return label
 
     """
     Helper method which checks if the given neighbour array is full
-    (>= 3 neighbours).
+    (>= M neighbours).
     """
     def full_neighbours(self, array):
         count = 0
         for i in range(self.NV):
             if array.item(i) != Constants.sX: count = count + 1
-        return count >= 3
+        return count >= self.M
 
     """
     Wrapper method which uses MH to sample as many switch
     settings (sigmas) as given by n.
     """
     def generate_switch_settings(self, n):
-        return np.random.randint(1, 3, size = self.NV)
+        return np.random.randint(Constants.switch_lower,
+                Constants.switch_higher + 1, size = self.NV)
 
     """
     Populates the graph G with generate switch settings.
