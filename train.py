@@ -34,17 +34,19 @@ def c(s, t):
     w = 0
     end_ix = 0
     # Search through matrix to find the adjacent vertices, assume deg(v) == 3
+    # Make sure f is the 0 edge
     for i in range(GR.NV):
-        if GR.G.item(v, i) != GR.sX and i != e1 and i != e2:
+        label = GR.G.item(v, i)
+        if label == Constants.s0 and i != e1 and i != e2:
             u = i
             end_ix = i
             break
     for i in range(end_ix + 1, GR.NV):
-        if GR.G.item(v, i) != GR.sX and i != e1 and i != e2 and i != u:
+        label = GR.G.item(v, i)
+        if label != Constants.sX and i != e1 and i != e2 and i != u:
             w = i
             break
-    # Incident edges to v != e (reversed order from description)
-    # TODO Make sure f is the 0 edge
+    # Incident edges to v != e
     f = (u, v)
     g = (w, v)
 
@@ -130,7 +132,7 @@ def calc_stop_obs_prob():
     for v in range(GR.NV):
         e = (v, 0)
         for w in range(GR.NV):
-            if GR.G.item(v, w) != GR.sX and w != v:
+            if GR.G.item(v, w) != Constants.sX and w != v:
                 print("pick", w, "for", v)
                 e = (v, w)
                 end_ix = w
@@ -139,7 +141,7 @@ def calc_stop_obs_prob():
         print(v, e)
 
         for w in range(end_ix + 1, GR.NV):
-            if GR.G.item(v, w) != GR.sX and w != v:
+            if GR.G.item(v, w) != Constants.sX and w != v:
                 print("pick", w, "for", v)
                 e = (v, w)
                 end_ix = w
@@ -148,7 +150,7 @@ def calc_stop_obs_prob():
         print(v, e)
 
         for w in range(end_ix + 1, GR.NV):
-            if GR.G.item(v, w) != GR.sX and w != v:
+            if GR.G.item(v, w) != Constants.sX and w != v:
                 print("pick", w, "for", v)
                 e = (v, w)
                 break
@@ -218,9 +220,8 @@ if __name__ == '__main__':
     # print(calc_stop_obs_prob())
 
     # Should be called on the stop position
-    # print("Correct stop position probability:", c((0, (0, 1)), T))
-    # print("Correct stop position probability:", c((6, (6, 1)), T))
-    # print("Incorrectstop position probability:", c((2, (2, 5)), T))
+    print("Stop position probability:", c((6, (6, 1)), HM.T))
+    print("Stop position probability:", c((2, (2, 5)), HM.T))
 
     # print("Generated samples:")
     # print(metropolis_hastings())
