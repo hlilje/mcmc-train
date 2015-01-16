@@ -11,7 +11,7 @@ class Graph:
     ### Model parameters
     # Graph over switches, switch x to y may be different from y to x
     G  = [[0]]
-    NV = Constants.vertices_count # |V(G)|
+    NV = Constants.vertex_count # |V(G)|
     M  = Constants.possible_observations
 
     def __init__(self):

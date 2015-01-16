@@ -14,8 +14,11 @@ class HMM:
     O  = [0]                             # Observation sequence (signals)
     C  = [[0]]                           # Matrix to store the c values
 
-    def __init__(self, N):
+    GR = 0 # Graph
+
+    def __init__(self, N, GR):
         self.N = N
+        self.GR = GR
         self.set_obserations()
         self.init_hmm()
 
@@ -60,10 +63,55 @@ class HMM:
         return observations
 
     """
+    Walks through the graph and generates possible observations,
+    while obfuscating them with a certain probability.
+    """
+    def generate_path_observations(self, n):
+        # Initial edge type
+        obs = np.random.randint(0, self.M)
+        observations = [obs]
+        path = []
+
+        # Initialisation of path
+        u = np.random.randint(0, self.GR.NV)
+        for i in range(self.GR.NV):
+            if i != u and self.GR.G.item(u, i) == obs:
+                path.append((u, i))
+                u = i
+
+        # First observation already set
+        for i in range(n):
+            if obs == Constants.s0:
+                # Randomise obs != s0
+                obs = np.random.randint(1, self.M)
+                for j in range(self.GR.NV):
+                    # Make sure not going back and find the edge
+                    if i != u and self.GR.G.item(u, j) == obs:
+                        observations.append(obs)
+                        u_old = u
+                        u = j
+                        path.append((u_old, u))
+                        break
+            elif obs == Constants.sL or obs == Constants.sR:
+                # Must be s0
+                obs = Constants.s0
+                for j in range(self.GR.NV):
+                    if i != u and self.GR.G.item(u, j) == obs:
+                        observations.append(obs)
+                        u_old = u
+                        u = j
+                        path.append((u_old, u))
+                        break
+
+        print(path)
+
+        return observations
+
+    """
     Wrapper method which sets the generated sequence of observations.
     """
     def set_obserations(self):
         self.O = np.array(np.zeros(self.T))
-        self.O = self.generate_observations(self.T)
+        self.O = self.generate_path_observations(self.T)
 
         print("Observations:", self.O)

@@ -47,8 +47,11 @@ def c(s, t):
             w = i
             break
     # Incident edges to v != e
+    # TODO Which is the correct order?
     f = (u, v)
     g = (w, v)
+    # f = (v, u)
+    # g = (v, w)
 
     print("f:", f, "g:", g)
 
@@ -215,13 +218,13 @@ if __name__ == '__main__':
 
     GR = Graph()
     # Initialise HMM with number of states
-    HM = HMM(GR.NV * HMM.M)
+    HM = HMM(GR.NV * HMM.M, GR)
 
-    print(calc_stop_obs_prob())
+    # print(calc_stop_obs_prob())
 
     # Should be called on the stop position
-    print("Stop position probability:", c((6, (6, 1)), HM.T))
-    print("Stop position probability:", c((2, (2, 5)), HM.T))
+    # print("Stop position probability:", c((6, (6, 1)), HM.T))
+    # print("Stop position probability:", c((2, (2, 5)), HM.T))
 
     # print("Generated samples:")
     # print(metropolis_hastings())

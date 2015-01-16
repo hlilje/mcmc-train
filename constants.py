@@ -9,7 +9,7 @@ class Constants:
     sX = 3 # No switch/edge
 
     # Graph/HMM constants
-    vertices_count        = 8
+    vertex_count          = 8
     observation_count     = 10
     possible_observations = 3
 
