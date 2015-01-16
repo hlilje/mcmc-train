@@ -138,6 +138,8 @@ def c(s, t):
 Calculates p(s, O | G, sigma)
 """
 def calc_stop_obs_prob():
+    debug = False
+
     prob_sum = 0.0
     probabilities = []
 
@@ -151,41 +153,44 @@ def calc_stop_obs_prob():
         prob = 0.0
         for w in range(GR.NV):
             if GR.G.item(v, w) != Constants.sX and w != v:
-                print("pick", w, "for", v)
+                if debug: print("pick", w, "for", v)
                 e = (v, w)
                 end_ix = w
                 break
         prob = c((v, e), t)
         probabilities.append(prob)
         prob_sum = prob_sum + prob
-        print(v, e)
+        if debug: print(v, e)
 
         for w in range(end_ix + 1, GR.NV):
             if GR.G.item(v, w) != Constants.sX and w != v:
-                print("pick", w, "for", v)
+                if debug: print("pick", w, "for", v)
                 e = (v, w)
                 end_ix = w
                 break
         prob = c((v, e), t)
         probabilities.append(prob)
         prob_sum = prob_sum + prob
-        print(v, e)
+        if debug: print(v, e)
 
         for w in range(end_ix + 1, GR.NV):
             if GR.G.item(v, w) != Constants.sX and w != v:
-                print("pick", w, "for", v)
+                if debug: print("pick", w, "for", v)
                 e = (v, w)
                 break
         prob = c((v, e), t)
         probabilities.append(prob)
         prob_sum = prob_sum + prob
-        print(v, e)
+        if debug: print(v, e)
 
-    print("Probabilities:", probabilities)
-    print("Most probable index:", probabilities.index(max(probabilities)), \
-            "of", len(probabilities), "states")
+    highest_prob = max(probabilities)
 
-    return prob_sum
+    if debug: print("Probabilities:", probabilities)
+    # print("Most probable index:", probabilities.index(max(probabilities)), \
+    #         "of", len(probabilities), "states")
+    if debug: print("Highest probability:", highest_prob, "of", len(probabilities), "states")
+
+    return (prob_sum, probabilities, highest_prob)
 
 """
 Calculates p(O | G, sigma).
@@ -218,39 +223,53 @@ def sigma_prob(sigma):
             e = (v, w)
             break
 
-    return c((v, e), HM.T)
+    # return c((v, e), HM.T)
+    return calc_stop_obs_prob()[2]
 
 """
 Metropolis-Hastings algorithm.
 Returns an array with the generated values.
 """
 def metropolis_hastings(num_samples):
-    burn_in = 100                  # Number of samples to discard
+    burn_in = 1                     # Number of samples to discard
     iters   = num_samples + burn_in # MH iterations
     s       = 10                    # Thinning steps
     # x       = 0                     # Initial state
     # p       = q(x)                  # Proposal sample
+    sigma = GR.generate_switch_settings(GR.NV) # Initial sigmas
+    sigma_alt = np.copy(sigma)                 # Alternative sigma
+    sigma_p = sigma_prob(sigma)                # Start probability
+    samples = [] # Sampled sigmas
+
     # print("Initial proposal sample:", p)
-    sigma = GR.generate_switch_settings(GR.NV)
-    print("Start sigma", sigma)
-    samples = [] # sigmas
+    print("Start sigma:", sigma)
+    print("Start sigma probability:", sigma_p)
 
     for i in range(iters):
         # xn = x + np.random.normal() # Normal proposal distribution, recent value
         # xn = np.random.randint(Constants.switch_lower, Constants.switch_higher + 1)
         # pn = q(xn) # Sample from proposal distribution
-        prob = sigma_prob(sigma)
-        # print("Sigma probability:", prob)
 
-        sigma_alt = np.random.shuffle(sigma)
-        prob_alt = sigma_prob(sigma)
+        # Test new sigma
+        np.random.shuffle(sigma_alt)
+        GR.set_switch_settings(sigma_alt)
+
+        sigma_alt_p = sigma_prob(sigma_alt)
+        print("Sigma prob:", sigma_p)
+        print("Alt. sigma prob:", sigma_alt_p)
+
+        if sigma_p > 0.0:
+            alpha = sigma_alt_p / sigma_p
+            if alpha >= 1.0 or random.random() <= alpha:
+                sigma = np.copy(sigma_alt)
+                sigma_p = sigma_alt_p
+        else:
+            sigma = np.copy(sigma_alt)
+            sigma_p = sigma_alt_p
         # print("New sigma probability", prob)
 
-        if prob_alt != 0.0 and prob_alt > prob:
-            sigma = sigma_alt
-            prob = prob_alt
         if i % s == 0 and i > burn_in: # Thin and wait for burn-in
-            samples.append((sigma, prob))
+            samples.append((sigma, sigma_p))
 
         # Accept proposal immediately if it is better than previous
         # if pn >= p:
@@ -281,5 +300,7 @@ if __name__ == '__main__':
     # Should be called on the stop position
     # print("Stop position probability:", c((6, (6, 1)), HM.T))
 
+    sigmas = metropolis_hastings(100)
     print("Generated samples:")
-    print(metropolis_hastings(10000))
+    print(sigmas)
+    print("Best sample:", max(sigmas, key=lambda x: x[1]))
