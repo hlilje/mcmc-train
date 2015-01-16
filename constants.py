@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 """
 Class containing global constants.
 """

@@ -223,7 +223,7 @@ if __name__ == '__main__':
     # print(calc_stop_obs_prob())
 
     # Should be called on the stop position
-    # print("Stop position probability:", c((6, (6, 1)), HM.T))
+    print("Stop position probability:", c((6, (6, 1)), HM.T))
     # print("Stop position probability:", c((2, (2, 5)), HM.T))
 
     # print("Generated samples:")
