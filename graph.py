@@ -2,17 +2,12 @@
 
 import random
 import numpy as np
+from constants import Constants
 
 """
 Class for generating graphs.
 """
 class Graph:
-    ### Symbols for switch edges/positions and signals
-    s0 = 0 # Only valid edge, no switch setting
-    sL = 1
-    sR = 2
-    sX = 3 # No switch/edge
-
     ### Model parameters
     # Graph over switches, switch x to y may be different from y to x
     G  = [[0]]
@@ -32,7 +27,7 @@ class Graph:
         while invalid_generation:
             total_tries = total_tries + 1
             self.G = np.matrix(np.zeros(shape = (n, n)))
-            self.G.fill(self.sX) # Fill with invalid
+            self.G.fill(Constants.sX) # Fill with invalid
             failed = False
 
             # Generate values for every vertex in G
@@ -41,7 +36,7 @@ class Graph:
                 for j in range(3):
                     if not self.full_neighbours(self.G[i, :]):
                         to = 0
-                        label = self.sX
+                        label = Constants.sX
                         valid = False
                         tries = 0
 
@@ -51,8 +46,8 @@ class Graph:
                             label = self.create_label(self.G[i, :])
 
                             # Check that it is a viable edge
-                            if i != to and self.G.item(i, to) == self.sX and \
-                                    self.G.item(to, i) == self.sX and not \
+                            if i != to and self.G.item(i, to) == Constants.sX and \
+                                    self.G.item(to, i) == Constants.sX and not \
                                     self.full_neighbours(self.G[to, :]):
                                 valid = True
                                 self.G[i, to] = label
@@ -82,7 +77,7 @@ class Graph:
     def full_neighbours(self, array):
         count = 0
         for i in range(self.NV):
-            if array.item(i) != self.sX: count = count + 1
+            if array.item(i) != Constants.sX: count = count + 1
         return count >= 3
 
     """

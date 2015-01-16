@@ -3,7 +3,7 @@
 import random
 import numpy as np
 #import scipy as sp
-
+from constants import Constants
 from graph import Graph
 from hmm import HMM
 
@@ -11,7 +11,6 @@ p      = 0.05    # Probability of faulty signal
 p_comp = 1.0 - p # Probability of correct signal
 GR     = 0       # Graph object
 HM     = 0       # HMM object
-PR     = 0       # Parser object
 
 """
 Recursively calculates the c value.
@@ -63,52 +62,52 @@ def c(s, t):
     print("e label:", e_label, "f label:", f_label, "v switch:", v_switch)
 
     ### Case 2
-    if e_label == Graph.s0 and obs == Graph.s0:
+    if e_label == Constants.s0 and obs == Constants.s0:
         print(">>> Case 2")
         return (c(s1, t_prev) + c(s2, t_prev)) * p_comp
 
     ### Case 3
-    if e_label == Graph.s0 and obs != Graph.s0:
+    if e_label == Constants.s0 and obs != Constants.s0:
         print(">>> Case 3")
         return (c(s1, t_prev) + c(s2, t_prev)) * p
 
     # TODO Does not work with the f == 0 constraint
 
     ### Case 4
-    # if e_label == Graph.sL and v_switch == Graph.sL and obs == Graph.sL \
-    #         and f_label == Graph.s0:
-    if e_label == Graph.sL and v_switch == Graph.sL and obs == Graph.sL:
+    # if e_label == Constants.sL and v_switch == Constants.sL and obs == Constants.sL \
+    #         and f_label == Constants.s0:
+    if e_label == Constants.sL and v_switch == Constants.sL and obs == Constants.sL:
         print(">>> Case 4")
         return c(s1, t_prev) * p_comp
 
     ### Case 5
-    # if e_label == Graph.sL and v_switch == Graph.sL and obs != Graph.sL \
-    #         and f_label == Graph.s0:
-    if e_label == Graph.sL and v_switch == Graph.sL and obs != Graph.sL:
+    # if e_label == Constants.sL and v_switch == Constants.sL and obs != Constants.sL \
+    #         and f_label == Constants.s0:
+    if e_label == Constants.sL and v_switch == Constants.sL and obs != Constants.sL:
         print(">>> Case 5")
         return c(s1, t_prev) * p
 
     ### Case 6
-    # if e_label == Graph.sR and v_switch == Graph.sR and obs == Graph.sR \
-    #         and f_label == Graph.s0:
-    if e_label == Graph.sR and v_switch == Graph.sR and obs == Graph.sR:
+    # if e_label == Constants.sR and v_switch == Constants.sR and obs == Constants.sR \
+    #         and f_label == Constants.s0:
+    if e_label == Constants.sR and v_switch == Constants.sR and obs == Constants.sR:
         print(">>> Case 6")
         return c(s1, t_prev) * p_comp
 
     ### Case 7
-    # if e_label == Graph.sR and v_switch == Graph.sR and obs != Graph.sR \
-    #         and f_label == Graph.s0:
-    if e_label == Graph.sR and v_switch == Graph.sR and obs != Graph.sR:
+    # if e_label == Constants.sR and v_switch == Constants.sR and obs != Constants.sR \
+    #         and f_label == Constants.s0:
+    if e_label == Constants.sR and v_switch == Constants.sR and obs != Constants.sR:
         print(">>> Case 7")
         return c(s1, t_prev) * p
 
     ### Case 8
-    if e_label == Graph.sL and v_switch == Graph.sR:
+    if e_label == Constants.sL and v_switch == Constants.sR:
         print(">>> Case 8 (impossible path)")
         return 0.0
 
     ### Case 9
-    if e_label == Graph.sR and v_switch == Graph.sL:
+    if e_label == Constants.sR and v_switch == Constants.sL:
         print(">>> Case 9 (impossible path)")
         return 0.0
 

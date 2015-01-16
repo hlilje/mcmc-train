@@ -2,7 +2,6 @@
 
 import numpy as np
 import fileinput
-
 from graph import Graph
 from hmm import HMM
 
@@ -30,15 +29,14 @@ class Parser:
             for j in range(NV):
                G[i, j] = int(values[j])
 
-        # TODO Should maybe be generated instead
         # Read observation sequence length
-        # T = int(next(data))
-        # O = np.array(np.zeros(T))
+        T = int(next(data))
+        O = np.array(np.zeros(T))
 
         # Read observation sequence
-        # values = next(data).split()
-        # for i in range(T):
-        #     O[i] = int(values[i])
+        values = next(data).split()
+        for i in range(T):
+            O[i] = int(values[i])
 
         # Set the parsed data
         GR.set_data(G, NV)

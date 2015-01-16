@@ -1,19 +1,18 @@
 #!/usr/bin/python3
 
 import numpy as np
-
-from graph import Graph
+from constants import Constants
 
 class HMM:
     ### HMM parameters
-    N  = 0     # Number of states (positions, (v, e) => |V(G)| x 3)
-    M  = 3     # Number of possible observations
-    T  = 0     # Number of observations
-    A  = [[0]] # Transition matrix (positions, always 1 due to fixed switches)
-    B  = [[0]] # Observation matrix
-    pi = [[0]] # Initial state probability distribution
-    O  = [0]   # Observation sequence (signals)
-    C  = [[0]] # Matrix to store the c values
+    N  = 0                               # Number of states (positions, (v, e) => |V(G)| x 3)
+    M  = Constants.possible_observations # Number of possible observations
+    T  = 0                               # Number of observations
+    A  = [[0]]                           # Transition matrix (positions, always 1 due to fixed switches)
+    B  = [[0]]                           # Observation matrix
+    pi = [[0]]                           # Initial state probability distribution
+    O  = [0]                             # Observation sequence (signals)
+    C  = [[0]]                           # Matrix to store the c values
 
     # def __init__(self):
 
@@ -56,11 +55,11 @@ class HMM:
         observations = [obs]
 
         for i in range(n - 1):
-            if obs == Graph.s0:
+            if obs == Constants.s0:
                 obs = np.random.randint(1, self.M)
                 observations.append(obs)
-            elif obs == Graph.sL or obs == Graph.sR:
-                obs = Graph.s0
+            elif obs == Constants.sL or obs == Constants.sR:
+                obs = Constants.s0
                 observations.append(obs)
 
         return observations
