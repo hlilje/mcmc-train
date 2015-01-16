@@ -16,7 +16,7 @@ class Graph:
 
     def __init__(self):
         self.generate_graph(self.NV)
-        self.set_switch_settings()
+        self.set_switch_settings(self.generate_switch_settings(self.NV))
         print("G:")
         print(self.G)
 
@@ -94,11 +94,9 @@ class Graph:
                 Constants.switch_higher + 1, size = self.NV)
 
     """
-    Populates the graph G with generate switch settings.
+    Populates the graph G with generated switch settings.
     """
-    def set_switch_settings(self):
-        sigmas = self.generate_switch_settings(self.NV)
-
+    def set_switch_settings(self, sigmas):
         print("Switch settings:", sigmas)
 
         # Populate the diagonal
