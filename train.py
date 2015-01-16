@@ -137,6 +137,7 @@ Calculates p(s, O | G, sigma)
 """
 def calc_stop_obs_prob():
     prob_sum = 0.0
+    probabilities = []
 
     # Calculate total probability for all states (positions) by
     # finding all three edges from all vertices (assume deg(v) = 3)
@@ -145,13 +146,16 @@ def calc_stop_obs_prob():
     t = HM.T
     for v in range(GR.NV):
         e = (v, 0)
+        prob = 0.0
         for w in range(GR.NV):
             if GR.G.item(v, w) != Constants.sX and w != v:
                 print("pick", w, "for", v)
                 e = (v, w)
                 end_ix = w
                 break
-        prob_sum = prob_sum + c((v, e), t)
+        prob = c((v, e), t)
+        probabilities.append(prob)
+        prob_sum = prob_sum + prob
         print(v, e)
 
         for w in range(end_ix + 1, GR.NV):
@@ -160,7 +164,9 @@ def calc_stop_obs_prob():
                 e = (v, w)
                 end_ix = w
                 break
-        prob_sum = prob_sum + c((v, e), t)
+        prob = c((v, e), t)
+        probabilities.append(prob)
+        prob_sum = prob_sum + prob
         print(v, e)
 
         for w in range(end_ix + 1, GR.NV):
@@ -168,8 +174,14 @@ def calc_stop_obs_prob():
                 print("pick", w, "for", v)
                 e = (v, w)
                 break
-        prob_sum = prob_sum + c((v, e), t)
-        print((v, e), t, prob_sum)
+        prob = c((v, e), t)
+        probabilities.append(prob)
+        prob_sum = prob_sum + prob
+        print(v, e)
+
+    print("Probabilities:", probabilities)
+    print("Most probable index:", probabilities.index(max(probabilities)), \
+            "of", len(probabilities), "states")
 
     return prob_sum
 
@@ -231,8 +243,7 @@ if __name__ == '__main__':
     # Initialise HMM with number of states
     HM = HMM(GR.NV * HMM.M, GR)
 
-    print(calc_stop_obs_prob())
-
+    print("Total probability:", calc_stop_obs_prob())
     print("Failures:", c_failures, "/", c_recursions)
 
     # Should be called on the stop position
