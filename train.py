@@ -83,7 +83,7 @@ def c(s, t):
         print(">>> Case 3")
         return (c(s1, t_prev) + c(s2, t_prev)) * p
 
-    # TODO Does not work with the f == 0 constraint
+    # TODO Does not always work with the f == 0 constraint
 
     ### Case 4
     if e_label == Constants.sL and v_switch == Constants.sL and obs == Constants.sL \
@@ -141,7 +141,7 @@ def calc_stop_obs_prob():
     # Calculate total probability for all states (positions) by
     # finding all three edges from all vertices (assume deg(v) = 3)
     # TODO Probably not correct
-    # for t in range(1, T+1):
+    # for t in range(1, HM.T + 1):
     t = HM.T
     for v in range(GR.NV):
         e = (v, 0)
