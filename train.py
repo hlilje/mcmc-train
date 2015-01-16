@@ -12,12 +12,18 @@ p_comp = Constants.probability_correct # Probability of correct signal
 GR     = 0                             # Graph object
 HM     = 0                             # HMM object
 
+c_recursions = 0 # Number of c recursions
+c_failures   = 0 # Number of c failures
+
 """
 Recursively calculates the c value.
 s is a position tuple (vertex, edge), t is the sequence index (1-indexed).
 TODO Must set sigma first, what are the observation symbols?
 """
 def c(s, t):
+    global c_recursions, c_failures
+    c_recursions = c_recursions + 1
+
     print("s:", s, "t:", t)
     ### Case 1
     if t == 0:
@@ -37,7 +43,8 @@ def c(s, t):
     # Make sure f is the 0 edge
     for i in range(GR.NV):
         label = GR.G.item(v, i)
-        if label == Constants.s0 and i != e1 and i != e2:
+        # if label == Constants.s0 and i != e1 and i != e2:
+        if label != Constants.sX and i != e1 and i != e2:
             u = i
             end_ix = i
             break
@@ -121,6 +128,10 @@ def c(s, t):
     print("f label at v:", f_label)
     print("v value:", v_switch)
 
+    c_failures = c_failures + 1
+
+    return 0.0 # TODO Should not be necessary
+
 """
 Calculates p(s, O | G, sigma)
 """
@@ -163,7 +174,7 @@ def calc_stop_obs_prob():
     return prob_sum
 
 """
-Calculates p(O | G, sigma)
+Calculates p(O | G, sigma).
 """
 def calc_obs_prob():
     # TODO Sum out the stop position
@@ -220,11 +231,12 @@ if __name__ == '__main__':
     # Initialise HMM with number of states
     HM = HMM(GR.NV * HMM.M, GR)
 
-    # print(calc_stop_obs_prob())
+    print(calc_stop_obs_prob())
+
+    print("Failures:", c_failures, "/", c_recursions)
 
     # Should be called on the stop position
-    print("Stop position probability:", c((6, (6, 1)), HM.T))
-    # print("Stop position probability:", c((2, (2, 5)), HM.T))
+    # print("Stop position probability:", c((6, (6, 1)), HM.T))
 
     # print("Generated samples:")
     # print(metropolis_hastings())

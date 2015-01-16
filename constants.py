@@ -12,7 +12,7 @@ class Constants:
 
     # Graph/HMM constants
     vertex_count          = 8
-    observation_count     = 10
+    observation_count     = 4
     possible_observations = 3
 
     # Limits for possible switch settings
