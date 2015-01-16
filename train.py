@@ -216,6 +216,7 @@ if __name__ == '__main__':
     HM = HMM()
     HM.set_data(GR.NV * 3) # Initialise HMM with number of states
 
+    print("Graph:")
     print(GR.G)
 
     # print(calc_stop_obs_prob())

@@ -16,7 +16,7 @@ class Graph:
     ### Model parameters
     # Graph over switches, switch x to y may be different from y to x
     G  = [[0]]
-    NV = 10 # |V(G)|
+    NV = 8 # |V(G)|
 
     def __init__(self):
         self.generate_graph(self.NV)
@@ -26,38 +26,64 @@ class Graph:
     Generates a graph of size n.
     """
     def generate_graph(self, n):
-        self.G = np.matrix(np.zeros(shape = (n, n)))
-        self.G.fill(self.sX) # Fill with invalid
+        invalid_generation = True
+        total_tries = 0
 
-        invalid_generation = False
+        while invalid_generation:
+            total_tries = total_tries + 1
+            self.G = np.matrix(np.zeros(shape = (n, n)))
+            self.G.fill(self.sX) # Fill with invalid
+            failed = False
 
-        # Generate values for G
-        for this in range(self.NV):
-            for edge in range(3):
-                if self.G.item(this, edge) == self.sX and not invalid_generation:
-                    (other, other_label) = (this, self.sX)
-                    valid = False
-                    tries = 0
+            # Generate values for every vertex in G
+            for i in range(self.NV):
+                # Create three edges
+                for j in range(3):
+                    if not self.full_neighbours(self.G[i, :]):
+                        to = 0
+                        label = self.sX
+                        valid = False
+                        tries = 0
 
-                    while not valid and not invalid_generation:
-                        other = random.randint(0, self.NV - 1)
-                        other_label = random.randint(0, 2)
+                        while not valid:
+                            tries = tries + 1
+                            to = random.randint(0, self.NV - 1)
+                            label = self.create_label(self.G[i, :])
 
-                        fv = other != this and self.G.item(this, other) == self.sX
-                        if fv:
-                            valid = True
-                            for i in range(3):
-                                if self.G.item(other, i) == this:
-                                    valid = False
+                            # Check that it is a viable edge
+                            if i != to and self.G.item(i, to) == self.sX and \
+                                    self.G.item(to, i) == self.sX and not \
+                                    self.full_neighbours(self.G[to, :]):
+                                valid = True
+                                self.G[i, to] = label
+                                # Create another label
+                                self.G[to, i] = self.create_label(self.G[to, :])
 
-                        if tries == 500:
-                            invalid_generation = True
-                            valid = True
-                        tries = tries + 1
+                            # Hard limit on number of tries
+                            if tries == 10000:
+                                failed = True
+                                break
+            invalid_generation = failed if True else False
+        print("Graph generated in", total_tries, "tries")
 
-                    if not invalid_generation:
-                        self.G[other, this] = other_label
-                        self.G[this, edge] = other
+    """
+    Helper method to create a unique label
+    """
+    def create_label(self, array):
+        label = random.randint(0, 2)
+        while label in array:
+            label = random.randint(0, 2)
+        return label
+
+    """
+    Helper method which checks if the given neighbour array is full
+    (>= 3 neighbours).
+    """
+    def full_neighbours(self, array):
+        count = 0
+        for i in range(self.NV):
+            if array.item(i) != self.sX: count = count + 1
+        return count >= 3
 
     """
     Wrapper method which uses MH to sample as many switch
