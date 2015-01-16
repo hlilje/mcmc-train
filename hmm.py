@@ -14,12 +14,7 @@ class HMM:
     O  = [0]                             # Observation sequence (signals)
     C  = [[0]]                           # Matrix to store the c values
 
-    # def __init__(self):
-
-    """
-    Sets the given data to this HMM.
-    """
-    def set_data(self, N):
+    def __init__(self, N):
         self.N = N
         self.set_obserations()
         self.init_hmm()

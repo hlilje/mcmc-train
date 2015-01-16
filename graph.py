@@ -60,6 +60,7 @@ class Graph:
                                 break
             invalid_generation = failed if True else False
         print("Graph generated in", total_tries, "tries")
+        print(self.G)
 
     """
     Helper method to create a unique label
