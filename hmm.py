@@ -105,8 +105,8 @@ class HMM:
 
         observations = np.array(observations)
 
-        print("Unmolested observations:")
-        print(observations)
+        # print("Unmolested observations:")
+        # print(observations)
 
         # Obfuscate observations with a probability
         for i in range(n):
@@ -123,5 +123,5 @@ class HMM:
         self.O = np.array(np.zeros(self.T))
         self.O = self.generate_path_observations(self.T)
 
-        print("Observations:")
-        print(self.O)
+        # print("Observations:")
+        # print(self.O)

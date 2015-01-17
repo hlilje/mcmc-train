@@ -3,6 +3,7 @@
 import random
 import numpy as np
 #import scipy as sp
+import collections
 from constants import Constants
 from graph import Graph
 from hmm import HMM
@@ -145,8 +146,6 @@ def calc_stop_obs_prob():
 
     # Calculate total probability for all states (positions) by
     # finding all three edges from all vertices (assume deg(v) = 3)
-    # TODO Probably not correct
-    # for t in range(1, HM.T + 1):
     t = HM.T
     for v in range(GR.NV):
         e = (v, 0)
@@ -193,99 +192,71 @@ def calc_stop_obs_prob():
     return (prob_sum, probabilities, highest_prob)
 
 """
-Calculates p(O | G, sigma).
+Generates a new sigma by flipping one random switch.
 """
-def calc_obs_prob():
-    # TODO Sum out the stop position
-    return 0.0
-
-"""
-Proposal distribution, a Gaussion distribution centred on x.
-Should match target distribution.
-"""
-def q(x):
-    # Centre, standard deviation (width), shape
-    # return np.random.normal(x)
-    # return np.random.randint(1, 3)
-    # Number of experiments, probabilities, size
-    # return np.argmax(np.random.multinomial(20, [1 / 2] * 2, size = 1))
-    return GR.generate_switch_settings(GR.NV)
+def get_sigma_proposal(old_sigma):
+    # Flip random switch
+    sigma = old_sigma.copy()
+    switch = np.random.randint(0, GR.NV)
+    sigma[switch] = Constants.sL if sigma[switch] == Constants.sR else Constants.sR
+    return sigma
 
 """
 Calculates the probability of the given sigma.
 """
 def sigma_prob(sigma):
-    # Pick random start
-    v = np.random.randint(0, GR.NV)
-    e = (v, 0)
-    for w in range(GR.NV):
-        if GR.G.item(v, w) == HM.O[-1] and w != v:
-            e = (v, w)
-            break
-
-    # return c((v, e), HM.T)
-    return calc_stop_obs_prob()[2]
+    GR.set_switch_settings(sigma)
+    return calc_stop_obs_prob()[0] # First ix is prob sum
 
 """
 Metropolis-Hastings algorithm.
-Returns an array with the generated values.
+Returns an array with the set of switches with the highest probability.
 """
 def metropolis_hastings(num_samples):
-    burn_in = 1                     # Number of samples to discard
-    iters   = num_samples + burn_in # MH iterations
-    s       = 10                    # Thinning steps
-    # x       = 0                     # Initial state
-    # p       = q(x)                  # Proposal sample
-    sigma = GR.generate_switch_settings(GR.NV) # Initial sigmas
-    sigma_alt = np.copy(sigma)                 # Alternative sigma
-    sigma_p = sigma_prob(sigma)                # Start probability
-    samples = [] # Sampled sigmas
+    burn_in       = int(num_samples / 2)     # Number of samples to discard
+    iters         = num_samples + burn_in    # MH iterations
+    s             = 2                        # Thinning steps
+    sigma         = GR.get_switch_settings() # Initial sigmas
+    sigma_p       = sigma_prob(sigma)        # Start probability
+    sigma_alt     = np.copy(sigma)           # Alternative sigma
+    sigma_alt_p   = 0.0                      # Alternative sigma probability
+    samples       = []                       # Sampled sigmas
+    probabilities = []                       # Probabilities corresponding to sigmas
 
-    # print("Initial proposal sample:", p)
-    print("Start sigma:", sigma)
-    print("Start sigma probability:", sigma_p)
+    # print("Start sigma:", sigma)
+    # print("Start sigma probability:", sigma_p)
 
     for i in range(iters):
-        # xn = x + np.random.normal() # Normal proposal distribution, recent value
-        # xn = np.random.randint(Constants.switch_lower, Constants.switch_higher + 1)
-        # pn = q(xn) # Sample from proposal distribution
+        if i % s == 0 and iters > burn_in: # Thin and burn-in
+            samples.append(sigma)
+            probability.append(sigma_p)
 
-        # Test new sigma
-        np.random.shuffle(sigma_alt)
-        GR.set_switch_settings(sigma_alt)
+        # Flip random switch
+        sigma_alt = get_sigma_proposal(sigma)
 
+        # print("Current sigma:\t", sigma)
+        # print("New sigma:\t", sigma_alt)
+
+        # Calculate new probability
         sigma_alt_p = sigma_prob(sigma_alt)
-        print("Sigma prob:", sigma_p)
-        print("Alt. sigma prob:", sigma_alt_p)
+        alpha = sigma_p / sigma_alt_p
+        prob = min(alpha, 1)
 
-        if sigma_p > 0.0:
-            alpha = sigma_alt_p / sigma_p
-            if alpha >= 1.0 or random.random() <= alpha:
-                sigma = np.copy(sigma_alt)
-                sigma_p = sigma_alt_p
-        else:
-            sigma = np.copy(sigma_alt)
-            sigma_p = sigma_alt_p
-        # print("New sigma probability", prob)
+        rand = random.random()
 
-        if i % s == 0 and i > burn_in: # Thin and wait for burn-in
-            samples.append((sigma, sigma_p))
+        if prob <= rand: sigma = sigma_alt
 
-        # Accept proposal immediately if it is better than previous
-        # if pn >= p:
-        #     p = pn
-        #     x = xn
-        # else:
-        #     # Posterior is the ration between proposed and previous sample
-        #     accept = min(1.0, pn / p) # Acceptance probability
-        #     u = np.random.rand() # Generate uniform sample
-        #     if u < pn / p: # Accept new samples
-        #         p = pn
-        #         x = xn
         # if i % s == 0 and i > burn_in: # Thin and wait for burn-in
-        #     samples.append(x)
 
-    return np.array(samples)
+    # Find the switch settings which was chosen most often
+    # Convert to tuples for Python comparison
+    tuples = [tuple(lst) for lst in samples]
+    counter = collections.Counter(tuples)
+    # print(counter.values())
+    # print(counter.keys())
+    most_common = list(counter.most_common(1)[0])
+
+    return most_common
 
 if __name__ == '__main__':
     random.seed()
@@ -300,7 +271,10 @@ if __name__ == '__main__':
     # Should be called on the stop position
     # print("Stop position probability:", c((6, (6, 1)), HM.T))
 
-    sigmas = metropolis_hastings(100)
-    print("Generated samples:")
-    print(sigmas)
-    print("Best sample:", max(sigmas, key=lambda x: x[1]))
+    # sigmas = metropolis_hastings(100)
+    # print("Generated samples:")
+    # print(sigmas)
+    # print("Best sample:", max(sigmas, key=lambda x: x[1]))
+
+    samples = metropolis_hastings(100)
+    # print(samples)

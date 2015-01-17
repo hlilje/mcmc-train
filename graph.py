@@ -97,10 +97,17 @@ class Graph:
     Populates the graph G with generated switch settings.
     """
     def set_switch_settings(self, sigmas):
-        print("Switch settings:", sigmas)
+        # print("Switch settings:", sigmas)
 
         # Populate the diagonal
         j = 0
         for i in range(self.NV):
             self.G[i, j] = sigmas[i]
             j = j + 1
+
+    """
+    Returns the current switch settings.
+    """
+    def get_switch_settings(self):
+        # Convert from matrix
+        return np.squeeze(np.asarray(self.G.diagonal())).tolist()
