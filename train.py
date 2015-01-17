@@ -218,18 +218,16 @@ def metropolis_hastings(num_samples):
     s             = 2                        # Thinning steps
     sigma         = GR.get_switch_settings() # Initial sigmas
     sigma_p       = sigma_prob(sigma)        # Start probability
-    sigma_alt     = np.copy(sigma)           # Alternative sigma
-    sigma_alt_p   = 0.0                      # Alternative sigma probability
     samples       = []                       # Sampled sigmas
-    probabilities = []                       # Probabilities corresponding to sigmas
+    # probabilities = []                       # Probabilities corresponding to sigmas
 
-    # print("Start sigma:", sigma)
-    # print("Start sigma probability:", sigma_p)
+    print("Start sigma:", sigma)
+    print("Start sigma probability:", sigma_p)
 
     for i in range(iters):
         if i % s == 0 and iters > burn_in: # Thin and burn-in
             samples.append(sigma)
-            probability.append(sigma_p)
+            # probabilities.append(sigma_p)
 
         # Flip random switch
         sigma_alt = get_sigma_proposal(sigma)
@@ -237,16 +235,17 @@ def metropolis_hastings(num_samples):
         # print("Current sigma:\t", sigma)
         # print("New sigma:\t", sigma_alt)
 
-        # Calculate new probability
+        # Calculate probabilites and compare
+        sigma_p = sigma_prob(sigma)
         sigma_alt_p = sigma_prob(sigma_alt)
         alpha = sigma_p / sigma_alt_p
         prob = min(alpha, 1)
 
         rand = random.random()
 
-        if prob <= rand: sigma = sigma_alt
-
-        # if i % s == 0 and i > burn_in: # Thin and wait for burn-in
+        if prob <= rand: # Accept better probability
+            sigma = sigma_alt
+            sigma_p = sigma_alt_p
 
     # Find the switch settings which was chosen most often
     # Convert to tuples for Python comparison
@@ -254,7 +253,8 @@ def metropolis_hastings(num_samples):
     counter = collections.Counter(tuples)
     # print(counter.values())
     # print(counter.keys())
-    most_common = list(counter.most_common(1)[0])
+    most_common = counter.most_common(1)[0]
+    print(most_common, "is most common out of", len(samples), "samples")
 
     return most_common
 
@@ -265,16 +265,5 @@ if __name__ == '__main__':
     # Initialise HMM with number of states
     HM = HMM(GR.NV * HMM.M, GR)
 
-    # print("Total probability:", calc_stop_obs_prob())
-    # print("Failures:", c_failures, "/", c_recursions)
-
-    # Should be called on the stop position
-    # print("Stop position probability:", c((6, (6, 1)), HM.T))
-
-    # sigmas = metropolis_hastings(100)
-    # print("Generated samples:")
-    # print(sigmas)
-    # print("Best sample:", max(sigmas, key=lambda x: x[1]))
-
-    samples = metropolis_hastings(100)
-    # print(samples)
+    settings = metropolis_hastings(1000)
+    print("Most likely switch settings:", list(settings[0]))
