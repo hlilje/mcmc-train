@@ -146,6 +146,7 @@ def calc_stop_obs_prob():
     # Calculate total probability for all states (positions) by
     # finding all three edges from all vertices (assume deg(v) = 3)
     t = HM.T
+    end_ix = 0
     for v in range(GR.NV):
         e = (v, 0)
         prob = 0.0
@@ -262,7 +263,53 @@ def metropolis_hastings(num_samples):
 Finds the most likely stop position given the probabilities.
 """
 def most_likely_stop(probabilites):
-    return 0.0
+    max_prob = 0.0
+    max_v = np.nan # Stop vertex
+    max_e = np.nan # Stop edge
+
+    counter = 0
+    end_ix = 0
+    for v in range(GR.NV):
+        e = (v, 0)
+        for w in range(GR.NV):
+            if GR.G.item(v, w) != Constants.sX and w != v:
+                e = (v, w)
+                end_ix = w
+                break
+
+        prob = probabilites[counter]
+        if prob > max_prob:
+            max_prob = prob
+            max_v = v
+            max_e = e
+        counter = counter + 1
+
+        for w in range(end_ix + 1, GR.NV):
+            if GR.G.item(v, w) != Constants.sX and w != v:
+                e = (v, w)
+                end_ix = w
+                break
+
+        prob = probabilites[counter]
+        if prob > max_prob:
+            max_prob = prob
+            max_v = v
+            max_e = e
+        counter = counter + 1
+
+        for w in range(end_ix + 1, GR.NV):
+            if GR.G.item(v, w) != Constants.sX and w != v:
+                e = (v, w)
+                break
+
+        prob = probabilites[counter]
+        if prob > max_prob:
+            max_prob = prob
+            max_v = v
+            max_e = e
+        counter = counter + 1
+
+    return (max_prob, max_v, max_e)
 
 if __name__ == '__main__':
     random.seed()
@@ -276,4 +323,7 @@ if __name__ == '__main__':
 
     GR.set_switch_settings(settings)
     prob_sum, probabilities, highest_prob = calc_stop_obs_prob()
-    print("Probability for correct settings:", prob_sum)
+    print("Probability for estimated correct settings:", prob_sum)
+
+    stop_pos = most_likely_stop(probabilities)
+    print("Estimated stop position (probability, vertex, edge):", stop_pos)
