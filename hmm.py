@@ -14,7 +14,8 @@ class HMM:
     O  = [0]                             # Observation sequence (signals)
     C  = [[0]]                           # Matrix to store the c values
 
-    GR = 0 # Graph
+    GR = 0  # Graph
+    P = [0] # Path which resulted in the observations
 
     def __init__(self, N, GR):
         self.N = N
@@ -65,6 +66,7 @@ class HMM:
     """
     Walks through the graph and generates possible observations,
     while obfuscating them with a certain probability.
+    Returns the observations and the correct path.
     """
     def generate_path_observations(self, n):
         # Initial edge type
@@ -114,14 +116,13 @@ class HMM:
             if r < Constants.probability_faulty * 100:
                 observations[r] = np.random.randint(0, self.M)
 
-        return observations
+        return observations, path
 
     """
     Wrapper method which sets the generated sequence of observations.
     """
     def set_obserations(self):
         self.O = np.array(np.zeros(self.T))
-        self.O = self.generate_path_observations(self.T)
-
-        # print("Observations:")
-        # print(self.O)
+        obs, path = self.generate_path_observations(self.T)
+        self.O = obs
+        self.P = path

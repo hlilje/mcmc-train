@@ -221,7 +221,8 @@ def metropolis_hastings(num_samples):
     samples       = []                       # Sampled sigmas
     # probabilities = []                       # Probabilities corresponding to sigmas
 
-    print("Start sigma:", sigma)
+    print("Start sigma:")
+    print(sigma)
     print("Start sigma probability:", sigma_p)
 
     for i in range(iters):
@@ -318,12 +319,23 @@ if __name__ == '__main__':
     # Initialise HMM with number of states
     HM = HMM(GR.NV * HMM.M, GR)
 
+    path = HM.P
+    print("Path:")
+    print(path)
+
+    observations =  HM.O
+    print("Observations:")
+    print(observations)
+
     settings = metropolis_hastings(1000)
-    print("Most likely switch settings:", settings)
+    print("Most likely switch settings:")
+    print(settings)
 
     GR.set_switch_settings(settings)
     prob_sum, probabilities, highest_prob = calc_stop_obs_prob()
     print("Probability for estimated correct settings:", prob_sum)
 
     stop_pos = most_likely_stop(probabilities)
-    print("Estimated stop position (probability, vertex, edge):", stop_pos)
+    print("Estimated stop position (p, v, e):", stop_pos)
+    e = stop_pos[2]
+    print("e label:", GR.G.item(e[0], e[1]))
