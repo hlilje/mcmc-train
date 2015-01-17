@@ -19,7 +19,6 @@ c_failures   = 0 # Number of c failures
 """
 Recursively calculates the c value.
 s is a position tuple (vertex, edge), t is the sequence index (1-indexed).
-TODO Must set sigma first, what are the observation symbols?
 """
 def c(s, t):
     debug = False
@@ -57,7 +56,7 @@ def c(s, t):
             w = i
             break
     # Incident edges to v != e
-    # TODO Which is the correct order?
+    # TODO Switch order?
     f = (u, v)
     g = (w, v)
     # f = (v, u)
@@ -255,8 +254,15 @@ def metropolis_hastings(num_samples):
     # print(counter.keys())
     most_common = counter.most_common(1)[0]
     print(most_common, "is most common out of", len(samples), "samples")
+    most_common = list(most_common[0]) # Unpack tuples
 
     return most_common
+
+"""
+Finds the most likely stop position given the probabilities.
+"""
+def most_likely_stop(probabilites):
+    return 0.0
 
 if __name__ == '__main__':
     random.seed()
@@ -266,4 +272,8 @@ if __name__ == '__main__':
     HM = HMM(GR.NV * HMM.M, GR)
 
     settings = metropolis_hastings(1000)
-    print("Most likely switch settings:", list(settings[0]))
+    print("Most likely switch settings:", settings)
+
+    GR.set_switch_settings(settings)
+    prob_sum, probabilities, highest_prob = calc_stop_obs_prob()
+    print("Probability for correct settings:", prob_sum)
