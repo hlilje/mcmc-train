@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
 import random
-import numpy as np
-#import scipy as sp
 import collections
+import numpy as np
+import matplotlib.pyplot as plt
 from constants import Constants
 from graph import Graph
 from hmm import HMM
@@ -213,13 +213,13 @@ Metropolis-Hastings algorithm.
 Returns an array with the set of switches with the highest probability.
 """
 def metropolis_hastings(num_samples):
-    burn_in       = int(num_samples / 2)     # Number of samples to discard
-    iters         = num_samples + burn_in    # MH iterations
-    s             = 2                        # Thinning steps
-    sigma         = GR.get_switch_settings() # Initial sigmas
-    sigma_p       = sigma_prob(sigma)        # Start probability
-    samples       = []                       # Sampled sigmas
-    # probabilities = []                       # Probabilities corresponding to sigmas
+    burn_in       = int(num_samples / 2)               # Number of samples to discard
+    iters         = num_samples + burn_in              # MH iterations
+    s             = 2                                  # Thinning steps
+    sigma         = GR.generate_switch_settings(GR.NV) # Generate initial sigmas
+    sigma_p       = sigma_prob(sigma)                  # Start probability
+    samples       = []                                 # Sampled sigmas
+    probabilities = []                                 # Saved probabilities
 
     print("Start sigma:")
     print(sigma)
@@ -228,7 +228,7 @@ def metropolis_hastings(num_samples):
     for i in range(iters):
         if i % s == 0 and iters > burn_in: # Thin and burn-in
             samples.append(sigma)
-            # probabilities.append(sigma_p)
+            probabilities.append(sigma_p)
 
         # Flip random switch
         sigma_alt = get_sigma_proposal(sigma)
@@ -239,12 +239,13 @@ def metropolis_hastings(num_samples):
         # Calculate probabilites and compare
         sigma_p = sigma_prob(sigma)
         sigma_alt_p = sigma_prob(sigma_alt)
-        alpha = sigma_p / sigma_alt_p
+        alpha = sigma_p / sigma_alt_p # Might give 0-division
         prob = min(alpha, 1)
 
         rand = random.random()
 
         if prob <= rand: # Accept better probability
+        # if prob <= 1 or prob <= rand: # Accept better probability
             sigma = sigma_alt
             sigma_p = sigma_alt_p
 
@@ -258,7 +259,7 @@ def metropolis_hastings(num_samples):
     print(most_common, "is most common out of", len(samples), "samples")
     most_common = list(most_common[0]) # Unpack tuples
 
-    return most_common
+    return most_common, probabilities
 
 """
 Finds the most likely stop position given the probabilities.
@@ -327,7 +328,7 @@ if __name__ == '__main__':
     print("Observations:")
     print(observations)
 
-    settings = metropolis_hastings(1000)
+    settings, setting_probs = metropolis_hastings(1000)
     print("Most likely switch settings:")
     print(settings)
 
@@ -339,3 +340,8 @@ if __name__ == '__main__':
     print("Estimated stop position (p, v, e):", stop_pos)
     e = stop_pos[2]
     print("e label:", GR.G.item(e[0], e[1]))
+
+    print("Setting probabilities:", len(setting_probs))
+    plt.plot(setting_probs)
+    plt.ylabel("MCMC sigma probability convergence")
+    plt.show()
