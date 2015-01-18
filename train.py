@@ -135,7 +135,7 @@ def c(s, t):
     return 0.0 # TODO Should not be necessary
 
 """
-Calculates p(s, O | G, sigma)
+Calculates p(s | G, sigma) by summing out s.
 """
 def calc_stop_obs_prob():
     debug = False
