@@ -226,10 +226,6 @@ def metropolis_hastings(num_samples):
     print("Start sigma probability:", sigma_p)
 
     for i in range(iters):
-        if i % s == 0 and iters > burn_in: # Thin and burn-in
-            samples.append(sigma)
-            probabilities.append(sigma_p)
-
         # Flip random switch
         sigma_alt = get_sigma_proposal(sigma)
 
@@ -239,15 +235,19 @@ def metropolis_hastings(num_samples):
         # Calculate probabilites and compare
         sigma_p = sigma_prob(sigma)
         sigma_alt_p = sigma_prob(sigma_alt)
-        alpha = sigma_p / sigma_alt_p # Might give 0-division
+        alpha = sigma_alt_p / sigma_p # Might give 0-division
         prob = min(alpha, 1)
 
         rand = random.random()
 
-        if prob <= rand: # Accept better probability
-        # if prob <= 1 or prob <= rand: # Accept better probability
-            sigma = sigma_alt
-            sigma_p = sigma_alt_p
+        if i % s == 0 and iters > burn_in: # Thin and burn-in
+            probabilities.append(sigma_alt_p) # Always save the generated probability
+
+            if prob >= 1 or prob >= rand: # Accept better probability
+                sigma = sigma_alt
+                sigma_p = sigma_alt_p
+                samples.append(sigma)
+                probabilities[-1] = sigma_p # Change to the better probability
 
     # Find the switch settings which was chosen most often
     # Convert to tuples for Python comparison
@@ -341,7 +341,9 @@ if __name__ == '__main__':
     e = stop_pos[2]
     print("e label:", GR.G.item(e[0], e[1]))
 
-    print("Setting probabilities:", len(setting_probs))
+    print("MCMC samples:", len(setting_probs))
     plt.plot(setting_probs)
-    plt.ylabel("MCMC sigma probability convergence")
+    plt.title("Metropolis-Hastings MCMC sampling")
+    plt.ylabel("Probability")
+    plt.xlabel("Sample")
     plt.show()
