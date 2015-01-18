@@ -11,8 +11,8 @@ class Constants:
     sX = 3 # No switch/edge
 
     # Graph/HMM constants
-    vertex_count          = 8
-    observation_count     = 4
+    vertex_count          = 10
+    observation_count     = 5
     possible_observations = 3
 
     # Limits for possible switch settings
